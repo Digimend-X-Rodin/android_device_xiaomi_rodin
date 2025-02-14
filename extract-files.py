@@ -110,6 +110,15 @@ blob_fixups: blob_fixups_user_type = {
       'system_ext/lib64/libcamera_ispinterface_jni.xiaomi.so'): blob_fixup()
         .add_needed('libgui_shim_miuicamera.so'),
 
+     'vendor/lib64/mt6897/libneuralnetworks_sl_driver_mtk_prebuilt.so': blob_fixup()
+        .clear_symbol_version('AHardwareBuffer_allocate')
+        .clear_symbol_version('AHardwareBuffer_createFromHandle')
+        .clear_symbol_version('AHardwareBuffer_describe')
+        .clear_symbol_version('AHardwareBuffer_getNativeHandle')
+        .clear_symbol_version('AHardwareBuffer_lock')
+        .clear_symbol_version('AHardwareBuffer_release')
+        .clear_symbol_version('AHardwareBuffer_unlock'),
+
       'system_ext/lib64/vendor.mediatek.hardware.camera.isphal-V1-ndk.so': blob_fixup()
          .replace_needed('android.hardware.graphics.common-V5-ndk.so', 'android.hardware.graphics.common-V6-ndk.so'),
 
