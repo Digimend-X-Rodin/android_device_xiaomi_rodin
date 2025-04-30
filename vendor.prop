@@ -122,6 +122,11 @@ vendor.camera.mdp.dre.enable=1
 vendor.mtk.camera.app.fd.video=1
 ro.vendor.camera3.zsl.default=260
 
+# Camera Extensions
+ro.camerax.extensions.enabled=true
+ro.vendor.camera.extensions.package=com.camera.camera2.extensions
+ro.vendor.camera.extensions.service=com.camera.camera2.extensions.Camera2VendorEx
+
 # Charger
 persist.vendor.accelerate.charge=true
 persist.vendor.batteryantiaging=1
