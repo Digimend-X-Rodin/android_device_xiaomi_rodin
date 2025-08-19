@@ -5,9 +5,9 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_generic.mk
+    $(LOCAL_DIR)/lineage_rodin.mk
 
 COMMON_LUNCH_CHOICES := \
-    lineage_generic-user \
-    lineage_generic-userdebug \
-    lineage_generic-eng
+    lineage_rodin-user \
+    lineage_rodin-userdebug \
+    lineage_rodin-eng
