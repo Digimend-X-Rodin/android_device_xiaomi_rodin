@@ -22,4 +22,7 @@
     <!-- UDFPS animation size and offset -->
     <dimen name="udfps_animation_size">200dp</dimen> <!-- ~556 px -->
     <integer name="udfps_animation_offset">20</integer> <!-- ~55.6 px -->
+
+    <!-- Blur radius behind Notification Shade -->
+    <dimen name="max_shade_window_blur_radius">16dp</dimen>
 </resources>
