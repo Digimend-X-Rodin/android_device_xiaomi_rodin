@@ -22,4 +22,18 @@
     <!-- UDFPS animation size and offset -->
     <dimen name="udfps_animation_size">200dp</dimen> <!-- ~556 px -->
     <integer name="udfps_animation_offset">20</integer> <!-- ~55.6 px -->
+
+    <!-- Window blur (shade, lockscreen, bouncer). Stock: 23px -->
+    <dimen name="max_window_blur_radius">14px</dimen>
+    <!-- Stock: 34dp -->
+    <dimen name="max_shade_window_blur_radius">18dp</dimen>
+    <dimen name="global_actions_blur_radius">18dp</dimen>
+    <!-- Stock: 30dp -->
+    <dimen name="bottomsheet_blur_radius">16dp</dimen>
+    <!-- Stock: 25dp -->
+    <dimen name="notification_background_blur_radius">14dp</dimen>
+    <!-- Stock: 23dp -->
+    <dimen name="volume_dialog_background_surface_blur_radius">14dp</dimen>
+    <!-- Stock: 50dp -->
+    <dimen name="dream_overlay_anim_blur_radius">20dp</dimen>
 </resources>

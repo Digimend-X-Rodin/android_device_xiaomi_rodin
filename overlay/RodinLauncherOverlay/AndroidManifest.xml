@@ -8,6 +8,6 @@
 
     <overlay
         android:isStatic="true"
-        android:priority="550"
+        android:priority="99"
         android:targetPackage="com.android.launcher3" />
 </manifest>
