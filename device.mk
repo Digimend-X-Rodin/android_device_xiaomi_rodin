@@ -303,6 +303,7 @@ $(call inherit-product, hardware/mediatek/overlay/mssi.mk)
 PRODUCT_PACKAGES += \
     RodinCarrierConfigOverlay \
     RodinFrameworksOverlay \
+    RodinLauncherOverlay \
     RodinNfcOverlay \
     RodinSecureElementOverlay \
     RodinSettingsOverlay \
