@@ -21,6 +21,9 @@ $(call inherit-product, vendor/mediatek/ims/ims.mk)
 # Dolby
 $(call inherit-product-if-exists, hardware/dolby/dolby.mk)
 
+PRODUCT_PACKAGES += \
+    LunarisDolby
+
 # Camera Configuration
 ifeq ($(TARGET_SHIPS_MIUICAMERA), true)
     $(call inherit-product-if-exists, device/xiaomi/rodin-miuicamera/device.mk)
