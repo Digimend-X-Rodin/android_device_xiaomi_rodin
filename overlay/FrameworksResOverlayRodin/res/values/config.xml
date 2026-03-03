@@ -181,27 +181,137 @@
         <item>1150</item>
         <item>1400</item>
     </array>
-
-    <!-- Array of light sensor lux values to define our levels for auto backlight brightness support.
-         The N entries of this array define N + 1 control points as follows:
-         (1-based arrays)
-
-         Point 1:            (0, value[1]):             lux <= 0
-         Point 2:     (level[1], value[2]):  0        < lux <= level[1]
-         Point 3:     (level[2], value[3]):  level[2] < lux <= level[3]
-         ...
-         Point N+1: (level[N], value[N+1]):  level[N] < lux
-
-         The control points must be strictly increasing.  Each control point
-         corresponds to an entry in the brightness backlight values arrays.
-         For example, if lux == level[1] (first element of the levels array)
-         then the brightness will be determined by value[2] (second element
-         of the brightness values array).
-
-         Spline interpolation is used to determine the auto-brightness
-         backlight values for lux levels between these control points.
-
-         Must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessLcdBacklightValues">
+        <item>40</item>
+        <item>108</item>
+        <item>177</item>
+        <item>246</item>
+        <item>314</item>
+        <item>383</item>
+        <item>452</item>
+        <item>488</item>
+        <item>509</item>
+        <item>533</item>
+        <item>557</item>
+        <item>583</item>
+        <item>610</item>
+        <item>639</item>
+        <item>669</item>
+        <item>700</item>
+        <item>733</item>
+        <item>768</item>
+        <item>804</item>
+        <item>841</item>
+        <item>890</item>
+        <item>920</item>
+        <item>962</item>
+        <item>1005</item>
+        <item>1062</item>
+        <item>1095</item>
+        <item>1143</item>
+        <item>1192</item>
+        <item>1237</item>
+        <item>1294</item>
+        <item>1347</item>
+        <item>1355</item>
+        <item>1362</item>
+        <item>1370</item>
+        <item>1377</item>
+        <item>1384</item>
+        <item>1391</item>
+        <item>1399</item>
+        <item>1406</item>
+        <item>1414</item>
+        <item>1421</item>
+        <item>1428</item>
+        <item>1435</item>
+        <item>1442</item>
+        <item>1449</item>
+        <item>1473</item>
+        <item>1497</item>
+        <item>1521</item>
+        <item>1546</item>
+        <item>1569</item>
+        <item>1593</item>
+        <item>1617</item>
+        <item>1640</item>
+        <item>1664</item>
+        <item>1688</item>
+        <item>1712</item>
+        <item>1736</item>
+        <item>1760</item>
+        <item>1784</item>
+        <item>1809</item>
+        <item>1832</item>
+        <item>1855</item>
+        <item>1880</item>
+        <item>1905</item>
+        <item>1929</item>
+        <item>2053</item>
+        <item>2212</item>
+        <item>2529</item>
+        <item>2861</item>
+        <item>3213</item>
+        <item>3572</item>
+        <item>3940</item>
+        <item>4314</item>
+        <item>4504</item>
+        <item>5488</item>
+        <item>6516</item>
+        <item>6823</item>
+        <item>7096</item>
+        <item>7370</item>
+        <item>7644</item>
+        <item>7917</item>
+        <item>8191</item>
+        <item>8396</item>
+        <item>8601</item>
+        <item>8805</item>
+        <item>9010</item>
+        <item>9215</item>
+        <item>9420</item>
+        <item>9625</item>
+        <item>9829</item>
+        <item>10034</item>
+        <item>10239</item>
+        <item>10444</item>
+        <item>10649</item>
+        <item>10853</item>
+        <item>11058</item>
+        <item>11263</item>
+        <item>11468</item>
+        <item>11775</item>
+        <item>12082</item>
+        <item>12389</item>
+        <item>12697</item>
+        <item>13004</item>
+        <item>13311</item>
+        <item>13721</item>
+        <item>13754</item>
+        <item>13787</item>
+        <item>13821</item>
+        <item>13854</item>
+        <item>13888</item>
+        <item>13920</item>
+        <item>13954</item>
+        <item>13987</item>
+        <item>14021</item>
+        <item>14053</item>
+        <item>14220</item>
+        <item>14386</item>
+        <item>14553</item>
+        <item>14719</item>
+        <item>14886</item>
+        <item>15052</item>
+        <item>15219</item>
+        <item>15385</item>
+        <item>15552</item>
+        <item>15717</item>
+        <item>15884</item>
+        <item>16050</item>
+        <item>16217</item>
+        <item>16383</item>
+    </integer-array>
     <integer-array name="config_autoBrightnessLevels">
         <item>1</item>
         <item>2</item>
@@ -352,15 +462,11 @@
         <item>1000</item>
     </array>
 
-     <!-- Screen brightness used to dim the screen when the user activity
-         timeout expires.  May be less than the minimum allowed brightness setting
-         that can be set by the user. -->
+    <item type="dimen" name="config_brightnessRampRateFast">0.41590282</item>
     <item type="dimen" name="config_screenBrightnessDimFloat">8.54597E-4</item>
-
     <item type="dimen" name="config_screenBrightnessSettingDefaultFloat">0.07496032</item>
     <item type="dimen" name="config_screenBrightnessSettingMaximumFloat">1.0</item>
     <item type="dimen" name="config_screenBrightnessSettingMinimumFloat">8.54597E-4</item>
-    <item type="dimen" name="config_brightnessRampRateFast">0.41590282</item>
 
     <integer name="config_brightness_ramp_rate_fast">4932</integer>
     <integer name="config_brightness_ramp_rate_slow">3946</integer>
@@ -396,12 +502,12 @@
     <integer name="config_screenBrightnessDim_hyper">15</integer>
     <integer name="config_screenBrightnessDoze">5</integer>
     <integer name="config_screenBrightnessSettingDefault">80</integer>
-    <integer name="config_screenBrightnessSettingDefault_hyper">1000</integer>
+    <integer name="config_screenBrightnessSettingDefault_hyper">1229</integer>
     <integer name="config_screenBrightnessSettingMaximum">255</integer>
     <integer name="config_screenBrightnessSettingMaximum_hyper">16383</integer>
     <integer name="config_screenBrightnessSettingMinimum">10</integer>
     <integer name="config_screenBrightnessSettingMinimum_hyper">15</integer>
-    <integer name="config_shutdownBatteryTemperature">540</integer>
+    <integer name="config_shutdownBatteryTemperature">520</integer>
 
     <integer name="config_nightDisplayColorTemperatureDefault">2850</integer>
     <integer name="config_nightDisplayColorTemperatureMax">4082</integer>
@@ -418,6 +524,7 @@
 
     <integer name="config_autoBrightnessBrighteningLightDebounce">1000</integer>
     <integer name="config_autoBrightnessDarkeningLightDebounce">1500</integer>
+    <integer name="config_batterySaver_full_soundTriggerMode">0</integer>
     <integer name="config_autoBrightnessInitialLightSensorRate">-1</integer>
     <integer name="config_autoBrightnessLightSensorRate">250</integer>
     <integer name="config_autoBrightnessShortTermModelTimeout">300000</integer>
@@ -428,7 +535,7 @@
          the framework from using higher refresh rates, even if display modes with higher refresh
          rates are available from hardware composer. Only has an effect if the value is
          non-zero. -->
-    <integer name="config_defaultPeakRefreshRate">120</integer>
+    <integer name="config_defaultPeakRefreshRate">121</integer>
 
     <!-- The default refresh rate for a given device. Change this value to set a higher default
          refresh rate. If the hardware composer on the device supports display modes with a higher
@@ -438,7 +545,7 @@
          If a non-zero value is set for config_defaultPeakRefreshRate, then
          config_defaultRefreshRate may be set to 0, in which case the value set for
          config_defaultPeakRefreshRate will act as the default frame rate. -->
-    <integer name="config_defaultRefreshRate">0</integer>
+    <integer name="config_defaultRefreshRate">121</integer>
 
     <!-- Controls the navigation bar interaction mode:
          0: 3 button mode (back, home, overview buttons)
@@ -477,7 +584,8 @@
 
          @see https://www.w3.org/TR/SVG/paths.html#PathData
          -->
-    <string name="config_mainBuiltInDisplayCutout">M 0,0 H -39 V 102 H 39 V 0 H 0 Z</string>
+    <string name="config_mainBuiltInDisplayCutout">M 0,0 H -33 V 130 H 33 V 0 H 0 Z</string>
+    <string name="config_mainDisplayShape">M20 0h1040s20 0 20 20v2360s0 20 -20 20h-1040s-20 0 -20 -20v-2360s0 -20 20 -20</string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -677,10 +785,10 @@
         <item>"/system/lib64/libsurfaceflinger.so"</item>
     </string-array>
 
-    <!-- Bytes that the PinnerService will pin for Home app -->
-    <integer name="config_pinnerHomePinBytes">6291456</integer>
-
-    <!-- Bytes that the PinnerService will pin for WebView -->
+    <integer name="config_pinnerAssistantPinBytes">62914560</integer>
+    <integer name="config_pinnerCameraPinBytes">83886080</integer>
+    <integer name="config_pinnerHomePinBytes">62914560</integer>
+    <integer name="config_pinnerMaxPinnedMemoryPercentage">10</integer>
     <integer name="config_pinnerWebviewPinBytes">20971520</integer>
 
     <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
@@ -724,26 +832,63 @@
     <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
     <bool name="config_zramWriteback">true</bool>
 
-    <integer name="config_allow_fast_rate_time">10000</integer>
+    <integer name="config_allow_fast_rate_time">3000</integer>
     <integer name="config_ambient_lux_for_peak">100000</integer>
-    <integer name="config_animation_duration_dim">1200</integer>
-    <integer name="config_animation_duration_doze_brightness">200</integer>
-    <integer name="config_animation_duration_hdr_brightness">4000</integer>
-    <integer name="config_animation_duration_manual_brightness">800</integer>
-    <integer name="config_animation_duration_manual_dimming">500</integer>
-
     <integer name="config_auto_brightness_touch_event_debounce">5</integer>
     <integer name="config_back_tap_touch_event_debounce">600</integer>
-    <integer name="config_backlightBit">8</integer>
+    <integer name="config_backlightBit">14</integer>
     <integer name="config_buttonBrightnessSettingDefault">200</integer>
     <integer name="config_autoBrightnessSmallBrighteningLightDebounce">5000</integer>
     <integer name="config_step_mode_darken_debounce_time">3000</integer>
     <integer name="config_step_mode_effectiveness_time">1300</integer>
 
-    <bool name="config_dual_nr_supported">false</bool>
-    <bool name="config_dual_sa_supported">false</bool>
-    <bool name="config_dual_volte_supported">false</bool>
-    <bool name="config_dual_wifi_dbs_support">false</bool>
+    <bool name="config_5g_new_call_supported">true</bool>
+    <bool name="config_connsys_thermal_ctrl_support">true</bool>
+    <bool name="config_disable_crbt_supported">true</bool>
+    <bool name="config_dual_nr_supported">true</bool>
+    <bool name="config_dual_sa_supported">true</bool>
+    <bool name="config_dual_volte_supported">true</bool>
+    <bool name="config_enableSapSarTxPowerLimit">false</bool>
+    <bool name="config_enableWifiPowerOptimize">true</bool>
+    <bool name="config_intl_telephony_stat_supported">true</bool>
+    <bool name="config_is_5ga_4cc_supported">true</bool>
+    <bool name="config_is_5ga_supported">true</bool>
+    <bool name="config_is_MODEM_DFS_supported">true</bool>
+    <bool name="config_is_bwp_supported">true</bool>
+    <bool name="config_is_bwp_switch_supported">true</bool>
+    <bool name="config_is_cmcc_cooperation_device">true</bool>
+    <bool name="config_is_conditional_handover_supported">true</bool>
+    <bool name="config_is_dsda_supported">true</bool>
+    <bool name="config_is_enable_dual_sa">true</bool>
+    <bool name="config_is_full_power_mode_supported">true</bool>
+    <bool name="config_is_global_crbt_supported">true</bool>
+    <bool name="config_is_hide_fiveg_and_network">true</bool>
+    <bool name="config_is_mievent_supported">true</bool>
+    <bool name="config_is_n28_supported">true</bool>
+    <bool name="config_is_n5_supported">true</bool>
+    <bool name="config_is_n8_supported">true</bool>
+    <bool name="config_is_nr_ca_supported">true</bool>
+    <bool name="config_is_obtain_card_slot_status_support">true</bool>
+    <bool name="config_is_rrc_inactice_supported">true</bool>
+    <bool name="config_is_rrc_segmentation_supported">true</bool>
+    <bool name="config_is_sul_supported">true</bool>
+    <bool name="config_is_support_vonr_plus">true</bool>
+    <bool name="config_is_ulca_supported">true</bool>
+    <bool name="config_is_use_sa_option3_mtk">true</bool>
+    <bool name="config_is_voice_mutable">true</bool>
+    <bool name="config_is_wus_supported">true</bool>
+    <bool name="config_mimo_supported">true</bool>
+    <bool name="config_offline_call_supported">true</bool>
+    <bool name="config_relay_call_supported">true</bool>
+    <bool name="config_relay_network_supported">true</bool>
+    <bool name="config_sa_power_optimization_supported">true</bool>
+    <bool name="config_smart_call_forward_supported">true</bool>
+    <bool name="config_special_network_optimization_supported">true</bool>
+    <bool name="config_thermal_brt_control_available">true</bool>
+    <bool name="config_vonr_supported">true</bool>
+    <bool name="device_support_ecc_cloud">true</bool>
+    <bool name="limit_usage_of_sap_5GHz_band">true</bool>
+    <string name="config_is_support_carrier_aggregation">00110</string>
 
     <bool name="config_displayBlanksAfterDoze">false</bool>
     <bool name="config_displayBrightnessBucketsInDoze">false</bool>
@@ -752,6 +897,7 @@
     <bool name="config_displayWhiteBalanceEnabledDefault">false</bool>
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
+    <bool name="config_dozeAfterScreenOff">true</bool>
     <bool name="config_dozeAfterScreenOffByDefault">true</bool>
     <bool name="config_dozeAlwaysOnDisplayAvailable">true</bool>
     <bool name="config_dozePickupGestureEnabled">true</bool>
@@ -765,6 +911,7 @@
     <bool name="config_dozeAlwaysOnEnabled">false</bool>
     <bool name="config_enableAutoPowerModes">true</bool>
     <bool name="config_stopSystemPackagesByDefault">false</bool>
+    <bool name="config_supportsCamToggle">true</bool>
     <bool name="config_supportsMicToggle">true</bool>
 
     <!-- Preferred max refresh rate at AOD & Ambient Display, if supported by the display. -->
