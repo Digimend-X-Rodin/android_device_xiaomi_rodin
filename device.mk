@@ -56,6 +56,9 @@ endif
 # Keys
 -include vendor/infinity-priv/keys/keys.mk
 
+$(call soong_config_set,surfaceflinger,frame_rate_category_high,120)
+$(call soong_config_set,surfaceflinger,frame_rate_category_min,60)
+
 # Rootdir
 PRODUCT_PACKAGES += \
     init.connectivity.rc \

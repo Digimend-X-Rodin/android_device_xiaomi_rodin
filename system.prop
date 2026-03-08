@@ -1,3 +1,6 @@
 # WiFi
 wifi.interface=wlan0
 wifi.supplicant_scan_interval=120
+
+# Defines Lunaris-AOSP Device Maintainer
+ro.lunaris.maintainer=RAM-UNLOK
