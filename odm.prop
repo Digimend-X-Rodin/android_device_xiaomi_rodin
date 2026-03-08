@@ -12,6 +12,85 @@ ro.vendor.sre.enable=false
 ro.vendor.xiaomi.bl.poll=true
 sys.displayfeature_hidl=false
 vendor.displayfeature.entry.enable=true
+ro.vendor.display.type=oled
+ro.vendor.display.default_fps=120
+ro.vendor.fps.switch.default=true
+ro.vendor.fps.switch.thermal=true
+ro.vendor.disable_idle_fps.threshold=966
+ro.vendor.hbm_backlight.enable=true
+ro.vendor.idle_fps=60
+ro.vendor.display.tp_idle_fps=60
+ro.vendor.display.touch.idle.enable=true
+ro.vendor.display.fod_monitor_default_fps=120
+ro.vendor.display.aod_monitor_default_fps=30
+ro.vendor.display.heartrate_lockfps_support=true
+ro.vendor.display.uiservice.enable=true
+ro.vendor.display.uiservice_track.enable=true
+ro.vendor.display.uiservice_tpidle_timer.enable=true
+ro.vendor.display.uiservice_snm.enable=true
+ro.vendor.display.ultimate.perf.support=true
+ro.vendor.display.video_or_camera_fps.support=true
+ro.vendor.display.frame_capture_manager.enable=true
+ro.vendor.display.dolbyvision.support=true
+vendor.display.default_resolution=1220,2712
+vendor.display.force_tonemapping=1
+
+# SurfaceFlinger
+ro.surface_flinger.enable_frame_rate_override=false
+ro.surface_flinger.set_touch_timer_ms=1100
+debug.sf.high_fps.late.sf.duration=13800000
+debug.sf.high_fps.late.app.duration=11100000
+debug.sf.high_fps.early.sf.duration=13800000
+debug.sf.high_fps.early.app.duration=11100000
+debug.sf.high_fps.earlyGl.sf.duration=13800000
+debug.sf.high_fps.earlyGl.app.duration=11100000
+debug.sf.set_idle_timer_ms=1100
+debug.sf.default_idle_timer_ms=1100
+
+# Vibrator
+ro.odm.mm.vibrator.sys_path=/sys/bus/i2c/drivers/awinic_haptic/0-005a
+ro.odm.mm.vibrator.device_type=ff
+ro.odm.mm.vibrator.diff_f0=1
+ro.odm.mm.vibrator.resonant_frequency=170
+ro.odm.mm.vibrator.si_sys_path=/sys/bus/i2c/drivers/sih_haptic_688X/0-006b
+ro.odm.mm.vibrator.aac_sys_path=/sys/bus/i2c/drivers/haptic_rt/0-005f
+ro.odm.mm.vibrator.lowPowerMode=true
+sys.haptic.motor=linear
+
+# NFC
+ro.vendor.se.type=HCE,UICC
+ro.vendor.se.chip.model=SN220T
+ro.vendor.nfc.disable.i2c=false
+ro.vendor.nfc.repair=1
+ro.vendor.nfc.dispatch_optim=2
+ro.vendor.nfc.wallet_fusion=1
+ro.vendor.nfc.aclog=1
+ro.vendor.nfc.debounce_field_on=1
+ro.vendor.nfc.field_on_debounce=800
+
+# Charging
+persist.vendor.smartchg=854
+persist.vendor.accelerate.charge=true
+persist.vendor.battery.health=true
+persist.vendor.battery.health.optimise=true
+persist.vendor.extreme.mode=true
+persist.vendor.battery.erp=true
+persist.vendor.tracking.dfs=true
+persist.vendor.doublentc=1
+persist.vendor.low.cutoff=true
+persist.vendor.hightemp.notice=true
+persist.vendor.night.charge=true
+persist.vendor.smart.battMntor.V2=true
+persist.vendor.region.charger=default
+
+# Audio
+audio.spatializer.pose_predictor_type=2
+audio.spatializer.prediction_duration_ms=50
+persist.vendor.audio.csd=true
+persist.vendor.audio.csd.gain=5
+
+# Radio
+persist.vendor.radio.dynamic_sar=1
 
 # SKU
 ro.product.property_source_order=odm,product,vendor,system_ext,system
