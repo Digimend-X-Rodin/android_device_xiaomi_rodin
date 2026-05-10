@@ -24,6 +24,7 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-8192-dalvik-heap.mk)
 
 # Rootdir
 PRODUCT_PACKAGES += \
+    init.batterysecret.rc \
     init.connectivity.rc \
     init.mi_thermald.rc \
     init.modem.rc \
