@@ -1,0 +1,706 @@
+From d02e41c8e05551994bc9b2490ee16d96f8f38011 Mon Sep 17 00:00:00 2001
+From: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+Date: Sat, 4 Jul 2026 23:09:10 +0530
+Subject: [PATCH] Add touch
+
+---
+ touch/aidl/Android.bp                         | 29 +++++++++++++++++++
+ .../aidl_api/vendor.lineage.touch/1/.hash     |  1 +
+ .../1/vendor/lineage/touch/Gesture.aidl       | 29 +++++++++++++++++++
+ .../1/vendor/lineage/touch/IGloveMode.aidl    | 28 ++++++++++++++++++
+ .../lineage/touch/IHighTouchPollingRate.aidl  | 28 ++++++++++++++++++
+ .../1/vendor/lineage/touch/IKeyDisabler.aidl  | 28 ++++++++++++++++++
+ .../1/vendor/lineage/touch/IKeySwapper.aidl   | 28 ++++++++++++++++++
+ .../1/vendor/lineage/touch/IStylusMode.aidl   | 28 ++++++++++++++++++
+ .../lineage/touch/ITouchscreenGesture.aidl    | 28 ++++++++++++++++++
+ .../current/vendor/lineage/touch/Gesture.aidl | 29 +++++++++++++++++++
+ .../vendor/lineage/touch/IGloveMode.aidl      | 28 ++++++++++++++++++
+ .../lineage/touch/IHighTouchPollingRate.aidl  | 28 ++++++++++++++++++
+ .../vendor/lineage/touch/IKeyDisabler.aidl    | 28 ++++++++++++++++++
+ .../vendor/lineage/touch/IKeySwapper.aidl     | 28 ++++++++++++++++++
+ .../vendor/lineage/touch/IStylusMode.aidl     | 28 ++++++++++++++++++
+ .../lineage/touch/ITouchscreenGesture.aidl    | 28 ++++++++++++++++++
+ touch/aidl/vendor/lineage/touch/Gesture.aidl  | 13 +++++++++
+ .../aidl/vendor/lineage/touch/IGloveMode.aidl | 12 ++++++++
+ .../lineage/touch/IHighTouchPollingRate.aidl  | 12 ++++++++
+ .../vendor/lineage/touch/IKeyDisabler.aidl    | 12 ++++++++
+ .../vendor/lineage/touch/IKeySwapper.aidl     | 12 ++++++++
+ .../vendor/lineage/touch/IStylusMode.aidl     | 12 ++++++++
+ .../lineage/touch/ITouchscreenGesture.aidl    | 14 +++++++++
+ 23 files changed, 511 insertions(+)
+ create mode 100644 touch/aidl/Android.bp
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/.hash
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/Gesture.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IGloveMode.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IHighTouchPollingRate.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeyDisabler.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeySwapper.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IStylusMode.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/ITouchscreenGesture.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/Gesture.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IGloveMode.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IHighTouchPollingRate.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeyDisabler.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeySwapper.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IStylusMode.aidl
+ create mode 100644 touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/ITouchscreenGesture.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/Gesture.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/IGloveMode.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/IHighTouchPollingRate.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/IKeyDisabler.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/IKeySwapper.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/IStylusMode.aidl
+ create mode 100644 touch/aidl/vendor/lineage/touch/ITouchscreenGesture.aidl
+
+diff --git a/touch/aidl/Android.bp b/touch/aidl/Android.bp
+new file mode 100644
+index 0000000..ea24bf6
+--- /dev/null
++++ b/touch/aidl/Android.bp
+@@ -0,0 +1,29 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++aidl_interface {
++    name: "vendor.lineage.touch",
++    vendor_available: true,
++    srcs: ["vendor/lineage/touch/*.aidl"],
++    stability: "vintf",
++    owner: "lineage",
++
++    backend: {
++        cpp: {
++            enabled: false,
++        },
++        java: {
++            sdk_version: "module_current",
++        },
++    },
++    frozen: true,
++    versions_with_info: [
++        {
++            version: "1",
++            imports: [],
++        },
++    ],
++
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/.hash b/touch/aidl/aidl_api/vendor.lineage.touch/1/.hash
+new file mode 100644
+index 0000000..53c0b05
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/.hash
+@@ -0,0 +1 @@
++b868107791478ef97bb468839375758fbc460e51
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/Gesture.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/Gesture.aidl
+new file mode 100644
+index 0000000..bf5aad0
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/Gesture.aidl
+@@ -0,0 +1,29 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++parcelable Gesture {
++  int id;
++  String name;
++  int keycode;
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IGloveMode.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IGloveMode.aidl
+new file mode 100644
+index 0000000..6edee93
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IGloveMode.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IGloveMode {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IHighTouchPollingRate.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IHighTouchPollingRate.aidl
+new file mode 100644
+index 0000000..da5db68
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IHighTouchPollingRate.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IHighTouchPollingRate {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeyDisabler.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeyDisabler.aidl
+new file mode 100644
+index 0000000..feae00a
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeyDisabler.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IKeyDisabler {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeySwapper.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeySwapper.aidl
+new file mode 100644
+index 0000000..7b4d718
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IKeySwapper.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IKeySwapper {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IStylusMode.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IStylusMode.aidl
+new file mode 100644
+index 0000000..28093be
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/IStylusMode.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IStylusMode {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/ITouchscreenGesture.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/ITouchscreenGesture.aidl
+new file mode 100644
+index 0000000..14ef21a
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/1/vendor/lineage/touch/ITouchscreenGesture.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface ITouchscreenGesture {
++  vendor.lineage.touch.Gesture[] getSupportedGestures();
++  void setGestureEnabled(in vendor.lineage.touch.Gesture gesture, in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/Gesture.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/Gesture.aidl
+new file mode 100644
+index 0000000..bf5aad0
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/Gesture.aidl
+@@ -0,0 +1,29 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++parcelable Gesture {
++  int id;
++  String name;
++  int keycode;
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IGloveMode.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IGloveMode.aidl
+new file mode 100644
+index 0000000..6edee93
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IGloveMode.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IGloveMode {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IHighTouchPollingRate.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IHighTouchPollingRate.aidl
+new file mode 100644
+index 0000000..da5db68
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IHighTouchPollingRate.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IHighTouchPollingRate {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeyDisabler.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeyDisabler.aidl
+new file mode 100644
+index 0000000..feae00a
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeyDisabler.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IKeyDisabler {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeySwapper.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeySwapper.aidl
+new file mode 100644
+index 0000000..7b4d718
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IKeySwapper.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IKeySwapper {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IStylusMode.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IStylusMode.aidl
+new file mode 100644
+index 0000000..28093be
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/IStylusMode.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface IStylusMode {
++  boolean getEnabled();
++  void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/ITouchscreenGesture.aidl b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/ITouchscreenGesture.aidl
+new file mode 100644
+index 0000000..14ef21a
+--- /dev/null
++++ b/touch/aidl/aidl_api/vendor.lineage.touch/current/vendor/lineage/touch/ITouchscreenGesture.aidl
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++///////////////////////////////////////////////////////////////////////////////
++// THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
++///////////////////////////////////////////////////////////////////////////////
++
++// This file is a snapshot of an AIDL file. Do not edit it manually. There are
++// two cases:
++// 1). this is a frozen version file - do not edit this in any case.
++// 2). this is a 'current' file. If you make a backwards compatible change to
++//     the interface (from the latest frozen version), the build system will
++//     prompt you to update this file with `m <name>-update-api`.
++//
++// You must not make a backward incompatible change to any AIDL file built
++// with the aidl_interface module type with versions property set. The module
++// type is used to build AIDL files in a way that they can be used across
++// independently updatable components of the system. If a device is shipped
++// with such a backward incompatible change, it has a high risk of breaking
++// later when a module using the interface is updated, e.g., Mainline modules.
++
++package vendor.lineage.touch;
++@VintfStability
++interface ITouchscreenGesture {
++  vendor.lineage.touch.Gesture[] getSupportedGestures();
++  void setGestureEnabled(in vendor.lineage.touch.Gesture gesture, in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/Gesture.aidl b/touch/aidl/vendor/lineage/touch/Gesture.aidl
+new file mode 100644
+index 0000000..ef7887c
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/Gesture.aidl
+@@ -0,0 +1,13 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++parcelable Gesture {
++    int id;
++    String name;
++    int keycode;
++}
+diff --git a/touch/aidl/vendor/lineage/touch/IGloveMode.aidl b/touch/aidl/vendor/lineage/touch/IGloveMode.aidl
+new file mode 100644
+index 0000000..cb1d7f9
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/IGloveMode.aidl
+@@ -0,0 +1,12 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++interface IGloveMode {
++    boolean getEnabled();
++    void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/IHighTouchPollingRate.aidl b/touch/aidl/vendor/lineage/touch/IHighTouchPollingRate.aidl
+new file mode 100644
+index 0000000..41fe388
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/IHighTouchPollingRate.aidl
+@@ -0,0 +1,12 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++interface IHighTouchPollingRate {
++    boolean getEnabled();
++    void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/IKeyDisabler.aidl b/touch/aidl/vendor/lineage/touch/IKeyDisabler.aidl
+new file mode 100644
+index 0000000..4a7cca2
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/IKeyDisabler.aidl
+@@ -0,0 +1,12 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++interface IKeyDisabler {
++    boolean getEnabled();
++    void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/IKeySwapper.aidl b/touch/aidl/vendor/lineage/touch/IKeySwapper.aidl
+new file mode 100644
+index 0000000..f4d3c3f
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/IKeySwapper.aidl
+@@ -0,0 +1,12 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++interface IKeySwapper {
++    boolean getEnabled();
++    void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/IStylusMode.aidl b/touch/aidl/vendor/lineage/touch/IStylusMode.aidl
+new file mode 100644
+index 0000000..788ccf2
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/IStylusMode.aidl
+@@ -0,0 +1,12 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++@VintfStability
++interface IStylusMode {
++    boolean getEnabled();
++    void setEnabled(in boolean enabled);
++}
+diff --git a/touch/aidl/vendor/lineage/touch/ITouchscreenGesture.aidl b/touch/aidl/vendor/lineage/touch/ITouchscreenGesture.aidl
+new file mode 100644
+index 0000000..e403dde
+--- /dev/null
++++ b/touch/aidl/vendor/lineage/touch/ITouchscreenGesture.aidl
+@@ -0,0 +1,14 @@
++/*
++ * SPDX-FileCopyrightText: 2025 The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package vendor.lineage.touch;
++
++import vendor.lineage.touch.Gesture;
++
++@VintfStability
++interface ITouchscreenGesture {
++    Gesture[] getSupportedGestures();
++    void setGestureEnabled(in Gesture gesture, in boolean enabled);
++}
+-- 
+2.53.0
+

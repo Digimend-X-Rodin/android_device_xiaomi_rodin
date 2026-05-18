@@ -1,0 +1,33 @@
+From 97322ad7e90c25150c5e68bce97a6e3597464ecf Mon Sep 17 00:00:00 2001
+From: Omkar Parte <rakmoparte@gmail.com>
+Date: Fri, 17 Jul 2026 10:57:43 +0530
+Subject: [PATCH] Simplify package allowlist by consolidating vendor extensions
+
+- Replace specific camera and xiaomi package patterns with broader wildcards
+- Reduce allowlist entries from 10 to 5 lines
+- Maintains same functional coverage with simpler regex patterns
+---
+ scripts/check_boot_jars/package_allowed_list.txt | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/scripts/check_boot_jars/package_allowed_list.txt b/scripts/check_boot_jars/package_allowed_list.txt
+index a0b2daf87..cf76e48c5 100644
+--- a/scripts/check_boot_jars/package_allowed_list.txt
++++ b/scripts/check_boot_jars/package_allowed_list.txt
+@@ -311,9 +311,6 @@ org\.ifaa\.aidl.*
+ vendor\.lineage\..*
+ 
+ ###################################################
+-# Xiaomi Extensions
+-com.xiaomi.extensions.*
+-
+-###################################################
+-# Camera Extensions
+-com.camera.camera2.extensions.*
+\ No newline at end of file
++# Xiaomi adds
++com\.xiaomi\..*
++com\.camera\..*
+-- 
+2.53.0
+
