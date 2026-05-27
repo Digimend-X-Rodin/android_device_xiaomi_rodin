@@ -235,12 +235,8 @@ ro.vendor.mtk_ovl_bringup=0
 ro.vendor.composer_version=3.3
 
 # HWUI
-debug.cpurend.vsync=false
-debug.hwui.target_cpu_time_percent=30
 debug.hwui.use_hint_manager=true
-debug.hwui.initialize_gl_always=1
-debug.hwui.skia_tracing_enabled=false
-debug.hwui.skia_use_perfetto_track_events=false
+debug.hwui.initialize_gl_always=0
 debug.hwui.render_dirty_regions=false
 debug.renderengine.backend=skiaglthreaded
 
@@ -308,7 +304,6 @@ ro.vendor.pq.mtk_mml_color_adaptive_support=0
 ro.vendor.pq.mtk_sdr_panel_dtmo_support=0
 ro.vendor.pq.mtk_smart_bluelight_def_support=1
 ro.vendor.pq.mtk_smart_true_tone_support=1
-
 ro.vendor.pq.mtk_libaibld_name=libaibld.nn6.so
 ro.vendor.pq.mtk_mdp_ccorr_support=0
 ro.vendor.pq.mtk_mdp_lite_pq_support=0
@@ -415,7 +410,7 @@ debug.sf.early.sf.duration=13100000
 debug.sf.early.app.duration=14600000
 debug.sf.earlyGl.sf.duration=13100000
 debug.sf.earlyGl.app.duration=14600000
-debug.sf.hwc.min.duration=8000000
+debug.sf.hwc.min.duration=4000000
 debug.sf.disable_backpressure=1
 debug.sf.enable_gl_backpressure=0
 debug.sf.enable_hwc_vds=0
@@ -448,10 +443,8 @@ ro.surface_flinger.supports_background_blur=1
 ro.surface_flinger.use_color_management=true
 ro.surface_flinger.uclamp.min=328
 ro.surface_flinger.wcg_composition_dataspace=143261696
-ro.surface_flinger.display_update_imminent_timeout_ms=50
+ro.surface_flinger.display_update_imminent_timeout_ms=100
 ro.surface_flinger.max_virtual_display_dimension=4096
-ro.surface_flinger.max_graphics_width=1220
-ro.surface_flinger.max_graphics_height=2712
 
 # TEE
 ro.vendor.mtk_microtrust_tee_support=1
