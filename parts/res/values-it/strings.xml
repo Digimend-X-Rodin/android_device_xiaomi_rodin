@@ -93,8 +93,8 @@
 
     <!-- ── Touch Boost ───────────────────────────────────────── -->
     <string name="touch_boost_title">Potenziamento tocco</string>
-    <string name="touch_boost_summary">Risposta táttile più rapida</string>
-    <string name="touch_boost_description">Aumenta la frequenza di aggiornamento del controller táttile, riducendo la latenza tra tocco e risposta. Potrebbe aumentare leggermente il consumo energetico durante l\'uso attivo.</string>
+    <string name="touch_boost_summary">Risposta tattile più rapida</string>
+    <string name="touch_boost_description">Aumenta la frequenza di aggiornamento del controller tattile, riducendo la latenza tra tocco e risposta. Potrebbe aumentare leggermente il consumo energetico durante l'uso attivo.</string>
     <string name="touch_boost_failed">Impossibile applicare il potenziamento tocco</string>
 
     <!-- ── Diagnostics ─────────────────────────────────────── -->
