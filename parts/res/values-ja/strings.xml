@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2023 Paranoid Android
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">Xiaomi Parts</string>
+
+    <!-- ── Xiaomi Parts Hub ────────────────────────────────────── -->
+    <string name="xiaomi_parts_title">Xiaomi Parts</string>
+    <string name="xiaomi_parts_summary">ディスプレイ、サーマル、タッチ</string>
+    <string name="xiaomi_parts_category_diagnostics">診断</string>
+
+    <!-- ── HomeScreen category headers ─────────────────────── -->
+    <string name="display_category">ディスプレイ</string>
+    <string name="performance_category">パフォーマンス</string>
+
+    <!-- ── Common UI ───────────────────────────────────────── -->
+    <string name="dismiss">閉じる</string>
+    <string name="cancel">キャンセル</string>
+    <string name="navigate_up">上に戻る</string>
+
+    <!-- ── Display Colours ────────────────────────────────── -->
+    <string name="display_colours_title">ディスプレイの色</string>
+    <string name="display_colours_summary">カラーモードと色温度</string>
+    <string name="display_colours_description">ディスプレイのカラーモードとホワイトバランスを調整し、より自然または鮮やかな表示にします。</string>
+    <string name="color_mode_vivid">ビビッド</string>
+    <string name="color_mode_saturated">サチュレーション</string>
+    <string name="color_mode_standard">標準</string>
+    <string name="color_mode_original">オリジナル</string>
+    <string name="color_mode_p3">DCI-P3</string>
+    <string name="color_mode_srgb">sRGB</string>
+    <string name="display_colours_failed">カラーモードの適用に失敗しました</string>
+    <string name="color_mode_vivid_summary">色とコントラストが強調</string>
+    <string name="color_mode_saturated_summary">日常使いに最適な豊かな色</string>
+    <string name="color_mode_standard_summary">工場出荷時キャリブレーション、忠実な色再現</string>
+    <string name="color_mode_original_summary">オリジナルの広色域チューニング</string>
+    <string name="color_mode_p3_summary">DCI-P3シネマカラースペース</string>
+    <string name="color_mode_srgb_summary">Web・デザイン向け精密sRGB</string>
+
+    <!-- ── Screen Resolution ──────────────────────────────── -->
+    <string name="screen_resolution_title">画面解像度</string>
+    <string name="screen_resolution_home_summary">ディスプレイの解像度を変更</string>
+    <string name="screen_resolution_description">より高い解像度を選択するとディスプレイがよりシャープになりますが、バッテリー消費が多くなります。低い解像度はバッテリー消費を抑えます。</string>
+    <string name="screen_resolution_failed">解像度の適用に失敗しました</string>
+    <string name="screen_resolution_1440p">2560 × 1440 (QHD+)</string>
+    <string name="screen_resolution_1440p_summary">最もシャープ — バッテリー消費が多い</string>
+    <string name="screen_resolution_1220p">2712 × 1220 (ネイティブ)</string>
+    <string name="screen_resolution_1220p_summary">パネルのネイティブ解像度</string>
+    <string name="screen_resolution_1080p">2400 × 1080 (FHD+)</string>
+    <string name="screen_resolution_1080p_summary">シャープさとバッテリーのバランス</string>
+    <string name="screen_resolution_720p">1600 × 720 (HD+)</string>
+    <string name="screen_resolution_720p_summary">最もバッテリー持ちが良い</string>
+    <string name="screen_resolution_dialog_title">解像度を変更しますか？</string>
+    <string name="screen_resolution_restart_hint_body">適用後、システムUIの再起動を推奨します。デバイスのディスプレイ設定でディスプレイサイズを変更しないでください。競合が発生する可能性があります。</string>
+    <string name="screen_resolution_dialog_confirm">適用</string>
+    <string name="screen_resolution_dialog_cancel">キャンセル</string>
+
+    <!-- ── Thermal Management ───────────────────────────────── -->
+    <string name="thermal_title">サーマル管理</string>
+    <string name="thermal_summary">アプリごとのパフォーマンスと温度</string>
+    <string name="thermal_enable_title">サーマルプロファイル</string>
+    <string name="thermal_enable_summary">アプリごとおよび充電中のサーマルプロファイルを適用</string>
+    <string name="thermal_global_label">グローバルプロファイル</string>
+    <string name="thermal_global_profile_title">アクティブプロファイル</string>
+    <string name="thermal_per_app_label">アプリごとのプロファイル</string>
+    <string name="thermal_select_profile">プロファイルを選択</string>
+    <string name="thermal_apply">適用</string>
+    <string name="thermal_no_apps">設定済みアプリなし</string>
+    <string name="thermal_failed_toast">サーマル操作に失敗しました</string>
+    <string name="thermal_charging_toast_connected">充電プロファイルがアクティブです</string>
+    <string name="thermal_charging_toast_disconnected">アプリごとのプロファイルが再開されました</string>
+    <string name="thermal_charging_banner_body">充電中はアプリごとのプロファイルが一時停止されます</string>
+    <string name="thermal_reset_title">全プロファイルをリセット</string>
+    <string name="thermal_reset_summary">すべてのアプリごとのプロファイルをデフォルトに戻す</string>
+    <string name="thermal_reset_confirm">リセット</string>
+    <string name="thermal_reset_confirm_body">すべてのアプリごとのサーマル上書きがクリアされ、プロファイルは自動検出されたデフォルトに戻ります。</string>
+    <string name="thermal_add_app">アプリを追加</string>
+    <string name="thermal_search_apps">アプリを検索</string>
+    <string name="thermal_default">デフォルト</string>
+    <string name="thermal_nolimits">制限なし</string>
+    <string name="thermal_navigation">ナビゲーション</string>
+    <string name="thermal_dialer">ダイヤラー</string>
+    <string name="thermal_video_call">ビデオ通話</string>
+    <string name="thermal_camera">カメラ</string>
+    <string name="thermal_video">動画</string>
+    <string name="thermal_video_4k">動画 4K</string>
+    <string name="thermal_gaming">ゲーミング</string>
+    <string name="thermal_gaming_heavy">ゲーミング（ヘビー）</string>
+    <string name="thermal_gaming_competitive">ゲーミング（コンペティティブ）</string>
+    <string name="thermal_yuanshen">原神</string>
+    <string name="thermal_charge">充電</string>
+
+    <!-- ── Touch Boost ───────────────────────────────────────── -->
+    <string name="touch_boost_title">タッチブースト</string>
+    <string name="touch_boost_summary">より速いタッチ応答</string>
+    <string name="touch_boost_description">タッチコントローラーのポーリングレートを上げ、タップから応答までの遅延を減らします。アクティブ使用時に電力消費が若干増える場合があります。</string>
+    <string name="touch_boost_failed">タッチブーストの適用に失敗しました</string>
+
+    <!-- ── Diagnostics ─────────────────────────────────────── -->
+    <string name="fingerprint_calibration_title">指紋キャリブレーション</string>
+    <string name="fingerprint_calibration_summary">指紋センサーを再キャリブレーション</string>
+    <string name="fingerprint_calibration_not_found">指紋キャリブレーションは利用できません</string>
+    <string name="speaker_calibration_title">スピーカーキャリブレーション</string>
+    <string name="speaker_calibration_summary">CITスピーカー自己キャリブレーションテスト</string>
+    <string name="speaker_calibration_not_found">スピーカーキャリブレーションは利用できません</string>
+</resources>
