@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2023 Paranoid Android
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">Xiaomi Parts</string>
+
+    <!-- ── Xiaomi Parts Hub ────────────────────────────────────── -->
+    <string name="xiaomi_parts_title">Xiaomi Parts</string>
+    <string name="xiaomi_parts_summary">Pantalla, Temperatura y Touch</string>
+    <string name="xiaomi_parts_category_diagnostics">Diagnósticos</string>
+
+    <!-- ── HomeScreen category headers ─────────────────────── -->
+    <string name="display_category">Pantalla</string>
+    <string name="performance_category">Rendimiento</string>
+
+    <!-- ── Common UI ───────────────────────────────────────── -->
+    <string name="dismiss">Descartar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="navigate_up">Navegar hacia arriba</string>
+
+    <!-- ── Display Colours ────────────────────────────────── -->
+    <string name="display_colours_title">Colores</string>
+    <string name="display_colours_summary">Modo de color y temperatura</string>
+    <string name="display_colours_description">Ajusta el modo de color y el balance de blancos de tu pantalla para lograr un aspecto más natural o vivo.</string>
+    <string name="color_mode_vivid">Vívido</string>
+    <string name="color_mode_saturated">Saturado</string>
+    <string name="color_mode_standard">Estándar</string>
+    <string name="color_mode_original">Original</string>
+    <string name="color_mode_p3">DCI-P3</string>
+    <string name="color_mode_srgb">sRGB</string>
+    <string name="display_colours_failed">Error al aplicar el modo de color</string>
+    <string name="color_mode_vivid_summary">Colores y contraste mejorados</string>
+    <string name="color_mode_saturated_summary">Colores intensos para el uso diario</string>
+    <string name="color_mode_standard_summary">Calibrado de fábrica, fiel a la realidad</string>
+    <string name="color_mode_original_summary">Ajuste original de amplia gama de colores</string>
+    <string name="color_mode_p3_summary">Espacio de color cinematográfico DCI-P3</string>
+    <string name="color_mode_srgb_summary">sRGB preciso para diseño y web</string>
+
+    <!-- ── Screen Resolution ──────────────────────────────── -->
+    <string name="screen_resolution_title">Resolución de la pantalla</string>
+    <string name="screen_resolution_home_summary">Cambiar la resolución de la pantalla</string>
+    <string name="screen_resolution_description">Seleccionar una resolución más alta hace que la pantalla se vea más nítida, pero consume más batería. Las resoluciones más bajas reducen el uso de la batería.</string>
+    <string name="screen_resolution_failed">Error al aplicar la resolución</string>
+    <string name="screen_resolution_1440p">2560 × 1440 (QHD+)</string>
+    <string name="screen_resolution_1440p_summary">Máxima nitidez — mayor uso de batería</string>
+    <string name="screen_resolution_1220p">2712 × 1220 (Nativa)</string>
+    <string name="screen_resolution_1220p_summary">Resolución nativa del panel</string>
+    <string name="screen_resolution_1080p">2400 × 1080 (FHD+)</string>
+    <string name="screen_resolution_1080p_summary">Equilibrio entre nitidez y batería</string>
+    <string name="screen_resolution_720p">1600 × 720 (HD+)</string>
+    <string name="screen_resolution_720p_summary">Mejor duración de batería</string>
+    <string name="screen_resolution_dialog_title">¿Cambiar resolución?</string>
+    <string name="screen_resolution_restart_hint_body">Después de aplicar, se recomienda reiniciar la IU del sistema. Evita cambiar el tamaño de la pantalla en los ajustes de pantalla del dispositivo, ya que puede causar conflictos.</string>
+    <string name="screen_resolution_dialog_confirm">Aplicar</string>
+    <string name="screen_resolution_dialog_cancel">Cancelar</string>
+
+    <!-- ── Thermal Management ───────────────────────────────── -->
+    <string name="thermal_title">Gestión térmica</string>
+    <string name="thermal_summary">Rendimiento y temperatura por aplicación</string>
+    <string name="thermal_enable_title">Perfiles térmicos</string>
+    <string name="thermal_enable_summary">Aplica perfiles térmicos por aplicación y durante la carga</string>
+    <string name="thermal_global_label">Perfil global</string>
+    <string name="thermal_global_profile_title">Perfil activo</string>
+    <string name="thermal_per_app_label">Perfiles por aplicación</string>
+    <string name="thermal_select_profile">Seleccionar perfil</string>
+    <string name="thermal_apply">Aplicar</string>
+    <string name="thermal_no_apps">Aún no se han configurado aplicaciones</string>
+    <string name="thermal_failed_toast">Error en la operación térmica</string>
+    <string name="thermal_charging_toast_connected">Perfil de carga activo</string>
+    <string name="thermal_charging_toast_disconnected">Se reanudaron los perfiles por aplicación</string>
+    <string name="thermal_charging_banner_body">Los perfiles por aplicación se pausan durante la carga</string>
+    <string name="thermal_reset_title">Restablecer todos los perfiles</string>
+    <string name="thermal_reset_summary">Restaurar todos los perfiles por aplicación a sus valores predeterminados</string>
+    <string name="thermal_reset_confirm">Restablecer</string>
+    <string name="thermal_reset_confirm_body">Se borrarán todas las modificaciones térmicas por aplicación y los perfiles volverán a los valores predeterminados detectados automáticamente.</string>
+    <string name="thermal_add_app">Añadir aplicación</string>
+    <string name="thermal_search_apps">Buscar aplicaciones</string>
+    <string name="thermal_default">Predeterminado</string>
+    <string name="thermal_nolimits">Sin límites</string>
+    <string name="thermal_navigation">Navegación</string>
+    <string name="thermal_dialer">Teléfono</string>
+    <string name="thermal_video_call">Videollamada</string>
+    <string name="thermal_camera">Cámara</string>
+    <string name="thermal_video">Video</string>
+    <string name="thermal_video_4k">Video 4K</string>
+    <string name="thermal_gaming">Juegos</string>
+    <string name="thermal_gaming_heavy">Juegos (pesados)</string>
+    <string name="thermal_gaming_competitive">Juegos (competitivo)</string>
+    <string name="thermal_yuanshen">Yuanshen</string>
+    <string name="thermal_charge">Carga</string>
+
+    <!-- ── Touch Boost ───────────────────────────────────────── -->
+    <string name="touch_boost_title">Mejora táctil</string>
+    <string name="touch_boost_summary">Respuesta táctil más rápida</string>
+    <string name="touch_boost_description">Aumenta la frecuencia de muestreo del controlador táctil, reduciendo la latencia de respuesta al tocar. Puede aumentar ligeramente el consumo de energía durante el uso activo.</string>
+    <string name="touch_boost_failed">Error al aplicar la mejora táctil</string>
+
+    <!-- ── Diagnostics ─────────────────────────────────────── -->
+    <string name="fingerprint_calibration_title">Calibración de huella digital</string>
+    <string name="fingerprint_calibration_summary">Recalibrar el sensor de huellas digitales</string>
+    <string name="fingerprint_calibration_not_found">La calibración de huella digital no está disponible</string>
+    <string name="speaker_calibration_title">Calibración de bocinas</string>
+    <string name="speaker_calibration_summary">Prueba de autocalibración de bocinas CIT</string>
+    <string name="speaker_calibration_not_found">La calibración de bocinas no está disponible</string>
+</resources>
