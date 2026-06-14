@@ -15,3 +15,5 @@ get_prop(vendor_init, vendor_batteryantiaging_prop)
 set_prop(vendor_init, vendor_batteryantiaging_prop)
 
 allow vendor_init proc:file rw_file_perms;
+
+set_prop(vendor_init, vendor_mischeck_prop)
