@@ -246,13 +246,16 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('libalsautils.so', 'libalsautils-mtk.so'),
 
     'system_ext/bin/hw/android.hardware.audio.parameter_parser.service': blob_fixup()
-        .replace_needed('android.hardware.audio.core-V3-ndk.so', 'android.hardware.audio.core-V4-ndk.so'),
+        .replace_needed('av-audio-types-aidl-ndk.so', 'av-audio-types-aidl-V3-ndk.so'),
 
     'vendor/etc/init/android.hardware.audio.service-aidl.mediatek.rc': blob_fixup()
         .regex_replace(
             'onrestart restart audioserver',
             'onrestart restart audioserver\n    onrestart restart vendor.sensors-hal-multihal\n    onrestart restart citsensorservice'
         ),
+    'odm/lib64/libMiPhotoFilter.so': blob_fixup()
+        .add_needed('libbinder_shim.so'),
+
 }  # fmt: skip
 
 module = ExtractUtilsModule(

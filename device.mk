@@ -108,11 +108,9 @@ PRODUCT_PACKAGES += \
     libdownmixaidl \
     libdynamicsprocessingaidl \
     libequalizersw \
-    liberaser \
     libhapticgeneratoraidl \
     libloudnessenhanceraidl \
     libnssw \
-    libenvreverbsw \
     libpreprocessingaidl \
     libpresetreverbsw \
     libreverbaidl \
