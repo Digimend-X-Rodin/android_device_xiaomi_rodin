@@ -89,6 +89,8 @@ blob_fixups: blob_fixups_user_type = {
         .apktool_patch('blob-patches/ImsService/'),
     'system_ext/lib64/libimsma.so': blob_fixup()
         .replace_needed('libsink.so', 'libsink-mtk.so'),
+    'system_ext/lib64/libsink-mtk.so': blob_fixup()
+        .add_needed('libaudioclient_shim.so'),
     ('odm/lib64/libmt_mitee.so', 'vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee'): blob_fixup()
         .replace_needed('android.hardware.security.keymint-V3-ndk.so', 'android.hardware.security.keymint-V3-ndk-v34.so'),
     'odm/bin/hw/vendor.xiaomi.sensor.citsensorservice.aidl': blob_fixup()

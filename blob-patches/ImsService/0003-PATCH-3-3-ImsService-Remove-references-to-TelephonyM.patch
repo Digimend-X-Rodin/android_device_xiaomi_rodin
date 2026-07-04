@@ -1,4 +1,4 @@
-From 26ba3f9f033ab9e7b56a0e1e4ea16fbc5e897cf5 Mon Sep 17 00:00:00 2001
+From 91b73cbce67e053bf04aa29123925912b0c3d6ec Mon Sep 17 00:00:00 2001
 From: Mashopy <eliasgheeraert@gmail.com>
 Date: Mon, 15 Dec 2025 22:51:41 +0100
 Subject: [PATCH 3/3] [PATCH 3/3] ImsService: Remove references to
@@ -218,7 +218,7 @@ index d918894..3d629fb 100644
      .line 409
      .end local v3    # "timeoutResponse":Ljava/lang/Object;
 diff --git a/smali/com/mediatek/wfo/ril/MwiRIL.smali b/smali/com/mediatek/wfo/ril/MwiRIL.smali
-index ffb7fb3..9c8917c 100644
+index 308ecd7..6506b78 100644
 --- a/smali/com/mediatek/wfo/ril/MwiRIL.smali
 +++ b/smali/com/mediatek/wfo/ril/MwiRIL.smali
 @@ -83,8 +83,6 @@
@@ -259,7 +259,7 @@ index ffb7fb3..9c8917c 100644
      const/4 v1, 0x0
 @@ -3464,25 +3449,6 @@
  
-     .line 1147
+     .line 1148
      :goto_0
 -    iget-object v1, p0, Lcom/mediatek/wfo/ril/MwiRIL;->mMetrics:Lcom/android/internal/telephony/metrics/TelephonyMetrics;
 -
@@ -281,7 +281,7 @@ index ffb7fb3..9c8917c 100644
 -    .local v6, "ret":Ljava/lang/Object;
 -    invoke-virtual/range {v1 .. v6}, Lcom/android/internal/telephony/metrics/TelephonyMetrics;->writeOnRilSolicitedResponse(IIIILjava/lang/Object;)V
  
-     .line 1149
+     .line 1150
      if-eqz p1, :cond_2
 -- 
 2.53.0
