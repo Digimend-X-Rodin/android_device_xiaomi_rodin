@@ -74,8 +74,6 @@ def lib_fixup_odm_suffix(lib: str, partition: str, *args, **kwargs):
 
 lib_fixups: lib_fixups_user_type = {
     **lib_fixups,
-    ('vendor.xiaomi.hw.touchfeature-V1-ndk'): lib_fixup_vendor_suffix,
-    ('vendor.xiaomi.hardware.fingerprintextension-V1-ndk'): lib_fixup_vendor_suffix,
     (
         'libneuron_graph_delegate.mtk',
         'libtflite_mtk',
@@ -253,6 +251,10 @@ blob_fixups: blob_fixups_user_type = {
             'onrestart restart audioserver',
             'onrestart restart audioserver\n    onrestart restart vendor.sensors-hal-multihal\n    onrestart restart citsensorservice'
         ),
+    'odm/lib64/libMiPhotoFilter.so': blob_fixup()
+        .add_needed('libbinder_shim.so'),
+    'system_ext/bin/hw/android.hardware.audio.parameter_parser.service': blob_fixup()
+        .replace_needed('av-audio-types-aidl-ndk.so', 'av-audio-types-aidl-V3-ndk.so'),
 }  # fmt: skip
 
 module = ExtractUtilsModule(

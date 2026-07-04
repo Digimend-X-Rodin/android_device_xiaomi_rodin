@@ -108,11 +108,9 @@ PRODUCT_PACKAGES += \
     libdownmixaidl \
     libdynamicsprocessingaidl \
     libequalizersw \
-    liberaser \
     libhapticgeneratoraidl \
     libloudnessenhanceraidl \
     libnssw \
-    libenvreverbsw \
     libpreprocessingaidl \
     libpresetreverbsw \
     libreverbaidl \
@@ -204,9 +202,6 @@ $(call soong_config_set,XIAOMI_BIOMETRICS_FINGERPRINT,IMPL_VER,V2)
 PRODUCT_PACKAGES += \
     android.hardware.biometrics.fingerprint-service.xiaomi \
     libudfpshandler
-
-PRODUCT_PACKAGES += \
-    sensors.xiaomi.v2
 
 PRODUCT_PACKAGES += \
     init.mt6899.fingerprint.rc
@@ -371,8 +366,7 @@ PRODUCT_COPY_FILES += \
 # Sensors
 PRODUCT_PACKAGES += \
     android.hardware.sensors-service.xiaomi-multihal \
-    android.hardware.sensors@2.0-subhal-impl-1.0 \
-    sensors.dynamic_sensor_hal
+    sensors.xiaomi.v2
 
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/configs/hals.conf:$(TARGET_COPY_OUT_VENDOR)/etc/sensors/hals.conf \
