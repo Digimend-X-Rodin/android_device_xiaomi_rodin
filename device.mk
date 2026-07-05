@@ -46,7 +46,7 @@ PRODUCT_SOONG_NAMESPACES += \
     $(DEVICE_PATH) \
     hardware/google/pixel \
     hardware/google/interfaces \
-    hardware/lineage/interfaces/power-libperfmgr \
+    hardware/clover/interfaces/power-libperfmgr \
     hardware/mediatek \
     hardware/mediatek/libaedv \
     hardware/mediatek/libmtkperf_client \
@@ -143,13 +143,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml
 
 $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
-
-# Axion Performance Mode
-PERF_GOV_SUPPORTED := true
-PERF_DEFAULT_GOV := schedutil
-
-GPU_FREQS_PATH := /sys/class/devfreq/13000000.mali/available_frequencies
-GPU_MIN_FREQ_PATH := /sys/class/devfreq/13000000.mali/min_freq
 
 # Bluetooth
 PRODUCT_PACKAGES += \
@@ -263,11 +256,15 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(DEVICE_PATH)/configs/media,$(TARGET_COPY_OUT_VENDOR)/etc)
 
-# MiuiCamera
+# Camera Configuration
 ifeq ($(TARGET_SHIPS_MIUICAMERA), true)
-    $(call inherit-product, device/xiaomi/rodin-miuicamera/device.mk)
+    $(call inherit-product-if-exists, device/xiaomi/rodin-miuicamera/device.mk)
     PRODUCT_VENDOR_PROPERTIES += \
         vendor.camera.aux.packagelist=com.android.camera
+else ifeq ($(TARGET_SHIPS_GCAM), true)
+    $(call inherit-product-if-exists, vendor/gcam/gcam.mk)
+    PRODUCT_VENDOR_PROPERTIES += \
+        vendor.camera.aux.packagelist=com.ss.android.ugc.aweme,com.meitu.meiyancamera
 else
     PRODUCT_VENDOR_PROPERTIES += \
         vendor.camera.aux.packagelist=org.lineageos.aperture
