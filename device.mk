@@ -18,6 +18,13 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 # Dalvik
 $(call inherit-product, frameworks/native/build/phone-xhdpi-8192-dalvik-heap.mk)
 
+# Build Signing
+-include vendor/infinity-priv/keys/keys.mk
+
+# Lunaris 
+$(call soong_config_set,surfaceflinger,frame_rate_category_high,120)
+$(call soong_config_set,surfaceflinger,frame_rate_category_min,60)
+
 # Rootdir
 PRODUCT_PACKAGES += \
     init.batterysecret.rc \
@@ -144,13 +151,6 @@ PRODUCT_COPY_FILES += \
 
 $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
 
-# Axion Performance Mode
-PERF_GOV_SUPPORTED := true
-PERF_DEFAULT_GOV := schedutil
-
-GPU_FREQS_PATH := /sys/class/devfreq/13000000.mali/available_frequencies
-GPU_MIN_FREQ_PATH := /sys/class/devfreq/13000000.mali/min_freq
-
 # Bluetooth
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth-service.mediatek
@@ -263,11 +263,15 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(DEVICE_PATH)/configs/media,$(TARGET_COPY_OUT_VENDOR)/etc)
 
-# MiuiCamera
+# Camera Configuration
 ifeq ($(TARGET_SHIPS_MIUICAMERA), true)
-    $(call inherit-product, device/xiaomi/rodin-miuicamera/device.mk)
+    $(call inherit-product-if-exists, device/xiaomi/rodin-miuicamera/device.mk)
     PRODUCT_VENDOR_PROPERTIES += \
         vendor.camera.aux.packagelist=com.android.camera
+else ifeq ($(TARGET_SHIPS_GCAM), true)
+    $(call inherit-product-if-exists, vendor/gcam/gcam.mk)
+    PRODUCT_VENDOR_PROPERTIES += \
+        vendor.camera.aux.packagelist=com.ss.android.ugc.aweme,com.meitu.meiyancamera
 else
     PRODUCT_VENDOR_PROPERTIES += \
         vendor.camera.aux.packagelist=org.lineageos.aperture

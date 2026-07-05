@@ -22,3 +22,6 @@ persist.vendor.wfc.sys_wfc_support=1
 persist.vendor.mtk_rtt_support=1
 persist.vendor.connsysfw.enable=true
 persist.sys.fuse.passthrough.enable=true
+
+# Defines Lunaris-AOSP Device Maintainer
+ro.lunaris.maintainer=RAM-UNLOK
