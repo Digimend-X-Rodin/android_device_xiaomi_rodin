@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2023 Paranoid Android
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">Xiaomi Parts</string>
+
+    <!-- ── Xiaomi Parts Hub ────────────────────────────────────── -->
+    <string name="xiaomi_parts_title">Xiaomi Parts</string>
+    <string name="xiaomi_parts_summary">Ecran, Termică și Atingere</string>
+    <string name="xiaomi_parts_category_diagnostics">Diagnosticare</string>
+
+    <!-- ── HomeScreen category headers ─────────────────────── -->
+    <string name="display_category">Ecran</string>
+    <string name="performance_category">Performanță</string>
+
+    <!-- ── Common UI ───────────────────────────────────────── -->
+    <string name="dismiss">Închide</string>
+    <string name="cancel">Anulează</string>
+    <string name="navigate_up">Navighează sus</string>
+
+    <!-- ── Display Colours ────────────────────────────────── -->
+    <string name="display_colours_title">Culori ecran</string>
+    <string name="display_colours_summary">Mod culori și temperatură</string>
+    <string name="display_colours_description">Ajustează modul de culoare și balansul de alb al ecranului pentru un aspect mai natural sau mai viu.</string>
+    <string name="color_mode_vivid">Viu</string>
+    <string name="color_mode_saturated">Saturat</string>
+    <string name="color_mode_standard">Standard</string>
+    <string name="color_mode_original">Original</string>
+    <string name="color_mode_p3">DCI-P3</string>
+    <string name="color_mode_srgb">sRGB</string>
+    <string name="display_colours_failed">Aplicarea modului de culoare a eșuat</string>
+    <string name="color_mode_vivid_summary">Culori și contrast îmbunătățite</string>
+    <string name="color_mode_saturated_summary">Culori bogate pentru utilizarea de zi cu zi</string>
+    <string name="color_mode_standard_summary">Calibrat din fabrică, fidel realității</string>
+    <string name="color_mode_original_summary">Acordare originală cu gamă largă</string>
+    <string name="color_mode_p3_summary">Spațiu de culoare DCI-P3 cinema</string>
+    <string name="color_mode_srgb_summary">sRGB precis pentru web și design</string>
+
+    <!-- ── Screen Resolution ──────────────────────────────── -->
+    <string name="screen_resolution_title">Rezoluție ecran</string>
+    <string name="screen_resolution_home_summary">Schimbă rezoluția ecranului</string>
+    <string name="screen_resolution_description">Selectarea unei rezoluții mai mari face ecranul mai clar, dar consumă mai multă baterie. Rezoluțiile mai mici reduc consumul de baterie.</string>
+    <string name="screen_resolution_failed">Aplicarea rezoluției a eșuat</string>
+    <string name="screen_resolution_1440p">2560 × 1440 (QHD+)</string>
+    <string name="screen_resolution_1440p_summary">Cel mai clar — consum mai mare de baterie</string>
+    <string name="screen_resolution_1220p">2712 × 1220 (Nativ)</string>
+    <string name="screen_resolution_1220p_summary">Rezoluția nativă a panoului</string>
+    <string name="screen_resolution_1080p">2400 × 1080 (FHD+)</string>
+    <string name="screen_resolution_1080p_summary">Claritate și baterie echilibrate</string>
+    <string name="screen_resolution_720p">1600 × 720 (HD+)</string>
+    <string name="screen_resolution_720p_summary">Cea mai bună autonomie a bateriei</string>
+    <string name="screen_resolution_dialog_title">Schimbi rezoluția?</string>
+    <string name="screen_resolution_restart_hint_body">După aplicare, se recomandă repornirea interfeței de sistem. Evită să schimbi dimensiunea ecranului în setările de afișaj ale dispozitivului, ar putea cauza conflicte.</string>
+    <string name="screen_resolution_dialog_confirm">Aplică</string>
+    <string name="screen_resolution_dialog_cancel">Anulează</string>
+
+    <!-- ── Thermal Management ───────────────────────────────── -->
+    <string name="thermal_title">Gestionare termică</string>
+    <string name="thermal_summary">Performanță și temperatură per aplicație</string>
+    <string name="thermal_enable_title">Profile termice</string>
+    <string name="thermal_enable_summary">Aplică profile termice per aplicație și în timpul încărcării</string>
+    <string name="thermal_global_label">Profil global</string>
+    <string name="thermal_global_profile_title">Profil activ</string>
+    <string name="thermal_per_app_label">Profile per aplicație</string>
+    <string name="thermal_select_profile">Selectează profilul</string>
+    <string name="thermal_apply">Aplică</string>
+    <string name="thermal_no_apps">Nicio aplicație configurată</string>
+    <string name="thermal_failed_toast">Operația termică a eșuat</string>
+    <string name="thermal_charging_toast_connected">Profil de încărcare activ</string>
+    <string name="thermal_charging_toast_disconnected">Profilele per aplicație au fost reluate</string>
+    <string name="thermal_charging_banner_body">Profilele per aplicație sunt suspendate în timpul încărcării</string>
+    <string name="thermal_reset_title">Resetează toate profilele</string>
+    <string name="thermal_reset_summary">Restabilește toate profilele per aplicație la valorile implicite</string>
+    <string name="thermal_reset_confirm">Resetează</string>
+    <string name="thermal_reset_confirm_body">Toate suprascrierile termice per aplicație vor fi șterse și profilele vor reveni la valorile implicite detectate automat.</string>
+    <string name="thermal_add_app">Adaugă aplicație</string>
+    <string name="thermal_search_apps">Caută aplicații</string>
+    <string name="thermal_default">Implicit</string>
+    <string name="thermal_nolimits">Fără limitări</string>
+    <string name="thermal_navigation">Navigare</string>
+    <string name="thermal_dialer">Apelant</string>
+    <string name="thermal_video_call">Apel video</string>
+    <string name="thermal_camera">Cameră</string>
+    <string name="thermal_video">Video</string>
+    <string name="thermal_video_4k">Video 4K</string>
+    <string name="thermal_gaming">Jocuri</string>
+    <string name="thermal_gaming_heavy">Jocuri (grele)</string>
+    <string name="thermal_gaming_competitive">Jocuri (competitive)</string>
+    <string name="thermal_yuanshen">Yuanshen</string>
+    <string name="thermal_charge">Încărcare</string>
+
+    <!-- ── Touch Boost ───────────────────────────────────────── -->
+    <string name="touch_boost_title">Boost tactil</string>
+    <string name="touch_boost_summary">Răspuns tactil mai rapid</string>
+    <string name="touch_boost_description">Crește frecvența de actualizare a controllerului tactil, reducând latența dintre atingere și răspuns. Poate crește ușor consumul de energie în timpul utilizării active.</string>
+    <string name="touch_boost_failed">Aplicarea boost-ului tactil a eșuat</string>
+
+    <!-- ── Diagnostics ─────────────────────────────────────── -->
+    <string name="fingerprint_calibration_title">Calibrare amprente</string>
+    <string name="fingerprint_calibration_summary">Recalibrează senzorul de amprente</string>
+    <string name="fingerprint_calibration_not_found">Calibrarea amprentelor nu este disponibilă</string>
+    <string name="speaker_calibration_title">Calibrare difuzor</string>
+    <string name="speaker_calibration_summary">Test de autocalibrare CIT difuzor</string>
+    <string name="speaker_calibration_not_found">Calibrarea difuzorului nu este disponibilă</string>
+</resources>
