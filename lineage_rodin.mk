@@ -9,6 +9,30 @@ $(call inherit-product, device/xiaomi/rodin/device.mk)
 # Inherit from the LineageOS configuration.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
+# AOSP Flags
+TARGET_BOOT_ANIMATION_RES := 1080
+TARGET_SUPPORTS_64_BIT_APPS := true
+TARGET_FACE_UNLOCK_SUPPORTED := true
+
+# Lunaris Build Flags
+WITH_GMS := true
+WITH_BCR := false
+TARGET_ENABLE_BLUR := true
+TARGET_CUSTOM_UDFPS := true
+USE_REALITY_ENGINE := false
+SURFACE_FLINGER_BOOST := false
+TARGET_OPTIMIZED_DEXOPT := true
+BYPASS_CHARGE_SUPPORTED := false
+TARGET_BUILD_DEVICE_AS_WEBCAM := true
+TARGET_SUPPORTED_REFRESH_RATES := 60,120
+WITH_GMS_COMMS_SUITE := false
+WITH_PIXEL_LAUNCHER := false
+TARGET_USE_MAPS := true
+TARGET_USE_FILES := true
+TARGET_USE_GMAIL := true
+TARGET_USE_GPHOTOS := true
+TARGET_USE_WALLPAPERS := true
+
 PRODUCT_BRAND := Xiaomi
 PRODUCT_DEVICE := rodin
 PRODUCT_MANUFACTURER := Xiaomi

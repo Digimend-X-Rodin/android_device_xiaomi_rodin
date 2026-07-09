@@ -30,3 +30,6 @@ wifi.supplicant_scan_interval=120
 wifi.tethering.interface=ap0
 ro.mediatek.wlan.wsc=1
 ro.mediatek.wlan.p2p=1
+
+# Defines Lunaris-AOSP Device Maintainer
+ro.lunaris.maintainer=RAM-UNLOK

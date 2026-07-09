@@ -28,6 +28,13 @@ AB_OTA_POSTINSTALL_CONFIG += \
     FILESYSTEM_TYPE_system=$(PRODUCT_SYSTEM_PARTITIONS_FILE_SYSTEM_TYPE) \
     POSTINSTALL_OPTIONAL_system=true
 
+# Build Signing
+-include vendor/infinity-priv/keys/keys.mk
+
+# Lunaris 
+$(call soong_config_set,surfaceflinger,frame_rate_category_high,120)
+$(call soong_config_set,surfaceflinger,frame_rate_category_min,60)
+
 PRODUCT_PACKAGES += \
     android.hardware.boot-service.mediatek \
     android.hardware.boot-service.mediatek_recovery
@@ -134,10 +141,6 @@ PRODUCT_COPY_FILES += \
 # Camera Extensions permissions
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/permissions/camerax-vendor-extensions.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/camerax-vendor-extensions.xml
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.device.front_cam=20MP \
-    ro.device.rear_cam="Dual 50MP+8MP"
 
 # ConsumerIR
 PRODUCT_PACKAGES += \
