@@ -117,7 +117,7 @@ on property:sys.boot_completed=1
     write /proc/sys/kernel/sched_pelt_multiplier 1
     write /proc/sys/kernel/sched_util_clamp_min_rt_default 226
     write /proc/sys/vm/watermark_scale_factor 200
-    write /sys/kernel/debug/sched/migration_cost_ns 400000
+    write /sys/kernel/debug/sched/migration_cost_ns 250000
     write /sys/devices/system/cpu/cpuidle/current_governor teo
     write /sys/devices/platform/soc/13000000.mali/devfreq/13000000.mali/governor simple_ondemand
     write /sys/devices/platform/soc/13000000.mali/power/control auto

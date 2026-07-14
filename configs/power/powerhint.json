@@ -112,7 +112,7 @@
         "10",
         "20"
       ],
-      "DefaultIndex": 1,
+      "DefaultIndex": 0,
       "ResetOnInit": true
     },
     {
@@ -386,7 +386,7 @@
         "55",
         "100"
       ],
-      "DefaultIndex": 0,
+      "DefaultIndex": 1,
       "ResetOnInit": true
     },
     {
@@ -399,7 +399,7 @@
         "35",
         "50"
       ],
-      "DefaultIndex": 0,
+      "DefaultIndex": 1,
       "ResetOnInit": true
     },
     {
