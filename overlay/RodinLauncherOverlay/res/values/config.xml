@@ -15,5 +15,4 @@
 -->
 <resources>
     <integer name="max_depth_blur_radius">12</integer>
-    <dimen name="max_depth_blur_radius_enhanced">16dp</dimen>
 </resources>
