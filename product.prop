@@ -42,6 +42,8 @@ ro.product.marketname=POCO X7 Pro
 
 # RKP
 remote_provisioning.hostname=remoteprovisioning.googleapis.com
+remote_provisioning.tee.rkp_only=1
+remote_provisioning.strongbox.rkp_only=1
 
 # Voice assitant
 ro.opa.eligible_device=true

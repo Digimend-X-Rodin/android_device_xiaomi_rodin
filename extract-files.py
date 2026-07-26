@@ -191,6 +191,7 @@ blob_fixups: blob_fixups_user_type = {
     'vendor/bin/hw/vendor.dolby.media.c2-service-vision': blob_fixup()
         .replace_needed('libcodec2_aidl.so', 'libcodec2_aidl_prebuilt.so'),
     'vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee': blob_fixup()
+        .replace_needed('android.hardware.security.keymint-V3-ndk.so', 'android.hardware.security.keymint-V3-ndk-v36.so')
         .replace_needed('lib_android_keymaster_keymint_utils.so', 'lib_android_keymaster_keymint_utils_V3.so')
         .replace_needed('libkeymint.so', 'libkeymint_V3.so'),
     'vendor/etc/init/hw/init.batterysecret.rc': blob_fixup()
