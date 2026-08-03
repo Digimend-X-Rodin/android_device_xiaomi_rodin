@@ -46,6 +46,9 @@ PRODUCT_PACKAGES += \
 BOARD_SHIPPING_API_LEVEL := 202404
 PRODUCT_SHIPPING_API_LEVEL := 35
 
+# Fenrir
+$(call soong_config_set_bool,fastbootd,bypass_lock_state,true)
+
 # Audio
 PRODUCT_PACKAGES += \
     audio.primary.default \
