@@ -77,7 +77,7 @@ on post-fs-data
     write /proc/sys/kernel/sched_pelt_multiplier 4
     write /proc/sys/kernel/sched_util_clamp_min_rt_default 0
 
-    # CPU sets
+    # CPU sets (Restrict Background strictly to Little Cores 0-3)
     write /dev/cpuset/foreground/cpus 0-7
     write /dev/cpuset/foreground_window/cpus 0-7
     write /dev/cpuset/background/cpus 0-3
@@ -133,6 +133,7 @@ on property:sys.boot_completed=1
     write /sys/devices/system/cpu/cpufreq/policy4/scaling_governor sugov_ext
     write /sys/devices/system/cpu/cpufreq/policy7/scaling_governor sugov_ext
 
+    # Standard default rate limits (Powerhint handles aggressive bursts)
     write /sys/devices/system/cpu/cpufreq/policy0/sugov_ext/up_rate_limit_us 300
     write /sys/devices/system/cpu/cpufreq/policy4/sugov_ext/up_rate_limit_us 300
     write /sys/devices/system/cpu/cpufreq/policy7/sugov_ext/up_rate_limit_us 300
@@ -157,21 +158,21 @@ on property:sys.boot_completed=1
     write /dev/cpuctl/system/cpu.uclamp.min 0
     write /dev/cpuctl/system/cpu.shares 20480
 
-    # system-background
+    # system-background (Strict Clamping for MIUI-like standby)
     write /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive 0
-    write /dev/cpuctl/system-background/cpu.uclamp.max 40
+    write /dev/cpuctl/system-background/cpu.uclamp.max 30
     write /dev/cpuctl/system-background/cpu.uclamp.min 0
     write /dev/cpuctl/system-background/cpu.shares 1024
 
-    # background
+    # background (Strict Clamping for MIUI-like standby)
     write /dev/cpuctl/background/cpu.uclamp.latency_sensitive 0
-    write /dev/cpuctl/background/cpu.uclamp.max 40
+    write /dev/cpuctl/background/cpu.uclamp.max 30
     write /dev/cpuctl/background/cpu.uclamp.min 0
     write /dev/cpuctl/background/cpu.shares 1024
 
-    # foreground
-    write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive 0
-    write /dev/cpuctl/foreground/cpu.uclamp.max 95
+    # foreground (Unrestricted max, latency sensitive for responsiveness)
+    write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive 1
+    write /dev/cpuctl/foreground/cpu.uclamp.max max
     write /dev/cpuctl/foreground/cpu.uclamp.min 0
     write /dev/cpuctl/foreground/cpu.shares 20480
 
@@ -199,7 +200,7 @@ on property:sys.boot_completed=1
     write /dev/cpuctl/camera-daemon/cpu.uclamp.min 0
     write /dev/cpuctl/camera-daemon/cpu.shares 20480
 
-    # dex2oat
+    # dex2oat (Clamp app installations to save heat/battery)
     write /dev/cpuctl/dex2oat/cpu.uclamp.latency_sensitive 0
     write /dev/cpuctl/dex2oat/cpu.uclamp.max 60
     write /dev/cpuctl/dex2oat/cpu.uclamp.min 0
