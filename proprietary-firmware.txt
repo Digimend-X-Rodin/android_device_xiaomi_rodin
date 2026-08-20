@@ -9,7 +9,7 @@ connsys_wifi.img;AB
 dpm.img;AB
 gpueb.img;AB
 gz.img;AB
-lk.img;AB
+rodin-fenrir.bin:lk.img;AB|4257fa7da49cbe06fc2279c672c97d0a4381b08c
 logo.img;AB
 mcf_ota.img;AB
 mcupm.img;AB
