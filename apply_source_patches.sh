@@ -22,6 +22,7 @@ PATCHES=(
     "packages/modules/Bluetooth 0001-Add-L2CAP-and-A2DP-offload-coex-mechanism-for-MTK.patch"
     "hardware/clover/interfaces 0001-Add-touch.patch"
     "build/soong 0001-Simplify-package-allowlist-by-consolidating-vendor-e.patch"
+    "system/core fenrir_vbmeta_combined.patch"
 )
 
 for entry in "${PATCHES[@]}"; do
