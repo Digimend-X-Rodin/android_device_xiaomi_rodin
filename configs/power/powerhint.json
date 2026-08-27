@@ -1234,13 +1234,13 @@
       "PowerHint": "AUDIO_STREAMING_LOW_LATENCY",
       "Node": "CPULittleClusterMinFreq",
       "Duration": 0,
-      "Value": "700000"
+      "Value": "1000000"
     },
     {
       "PowerHint": "AUDIO_STREAMING_LOW_LATENCY",
       "Node": "CPUMidClusterMinFreq",
       "Duration": 0,
-      "Value": "700000"
+      "Value": "1000000"
     },
     {
       "PowerHint": "CAMERA_VIDEO_RECORDING",
