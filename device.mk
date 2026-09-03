@@ -117,6 +117,10 @@ PRODUCT_COPY_FILES += \
 TARGET_SCREEN_HEIGHT := 2772
 TARGET_SCREEN_WIDTH := 1280
 
+# BypassCharge
+PRODUCT_PACKAGES += \
+    BypassCharge
+
 # Miui Camera
 $(call inherit-product-if-exists, device/xiaomi/rodin-miuicamera/device.mk)
 
