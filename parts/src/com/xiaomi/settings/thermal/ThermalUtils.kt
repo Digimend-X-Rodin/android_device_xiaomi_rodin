@@ -227,7 +227,7 @@ class ThermalUtils private constructor(private val context: Context) {
         GAMING_HEAVY       (9,  "18",  R.string.thermal_gaming_heavy),
         GAMING_COMPETITIVE (10, "700", R.string.thermal_gaming_competitive),
         YUANSHEN           (11, "20",  R.string.thermal_yuanshen),
-        CHARGE             (12, "27",  R.string.thermal_charge, userSelectable = false),
+        CHARGE             (12, "0",  R.string.thermal_charge, userSelectable = false),
     }
 
     companion object {
@@ -235,7 +235,7 @@ class ThermalUtils private constructor(private val context: Context) {
         const val THERMAL_ENABLED              = "thermal_enabled"
         const val THERMAL_PACKAGE_PREFIX       = "thermal_package_"
         const val THERMAL_SCONFIG              = "/sys/devices/virtual/thermal/thermal_message/sconfig"
-        const val SCONFIG_CHARGE               = "27"
+        const val SCONFIG_CHARGE               = "0"
 
         private val YUANSHEN_PKGS = listOf(
             "com.miHoYo.Yuanshen",

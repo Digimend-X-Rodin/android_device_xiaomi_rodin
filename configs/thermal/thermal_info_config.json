@@ -108,21 +108,21 @@
         {
             "Name":"battery",
             "Type":"BATTERY",
-            "HotThreshold":["NaN", "NaN", "NaN", "NaN", "NaN", "NaN", 50.0],
+            "HotThreshold":["NaN", "NaN", "NaN", "NaN", "NaN", 50.0, 55.0],
             "VrThreshold":50.0,
             "Multiplier":0.001
         },
         {
             "Name":"mtktsbtsmdpa",
             "Type":"POWER_AMPLIFIER",
-            "HotThreshold":["NaN", "NaN", "NaN", "NaN", "NaN", 65.0, "NaN"],
+            "HotThreshold":["NaN", "NaN", "NaN", "NaN", "NaN", 75.0, "NaN"],
             "VrThreshold":"NaN",
             "Multiplier":0.001
         },
         {
             "Name":"mtktsAP",
             "Type":"SKIN",
-            "HotThreshold":["NaN", "NaN", "NaN", 46.0, 56.0, 66.0, "NaN"],
+            "HotThreshold":["NaN", "NaN", "NaN", 50.0, 60.0, 70.0, 80.0],
             "VrThreshold":50.0,
             "Multiplier":0.001,
             "Monitor":true
@@ -130,7 +130,7 @@
         {
             "Name":"quiet_therm",
             "Type":"SKIN",
-            "HotThreshold":["NaN", "NaN", "NaN", 44.0, 48.0, 52.0, "NaN"], 
+            "HotThreshold":["NaN", "NaN", "NaN", 46.0, 56.0, 66.0, "NaN"], 
             "VrThreshold":50.0,
             "Multiplier":0.001,
             "Monitor":true
