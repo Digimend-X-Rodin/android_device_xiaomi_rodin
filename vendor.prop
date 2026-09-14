@@ -158,7 +158,7 @@ ro.surface_flinger.supports_background_blur=1
 ro.surface_flinger.use_color_management=true
 ro.surface_flinger.uclamp.min=328
 ro.surface_flinger.wcg_composition_dataspace=143261696
-ro.surface_flinger.display_update_imminent_timeout_ms=100
+ro.surface_flinger.display_update_imminent_timeout_ms=50
 ro.vendor.mtk.gpu.service=1
 ro.vendor.mtk.gpud.mm.fbc.disable=false
 
