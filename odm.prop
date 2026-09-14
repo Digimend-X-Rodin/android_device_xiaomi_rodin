@@ -26,6 +26,8 @@ persist.vendor.smart.battMntor.V2=true
 persist.vendor.region.charger=default
 
 # Display
+ro.surface_flinger.enable_frame_rate_override=false
+ro.vendor.display.video_or_camera_fps.support=true
 ro.vendor.display.RemapBrightness.MaxRemapSilkybrightness=16379
 ro.vendor.display.RemapBrightness.MaxTolerancefac=1.09
 ro.vendor.display.RemapBrightness.MinTolerancefac=1
@@ -57,6 +59,11 @@ vendor.displayfeature.entry.enable=true
 ro.vendor.mi_sf.hdr_enable_flatmode=true
 ro.vendor.mtk.pq.aidl=true
 ro.vendor.xiaomi.bl.poll=true
+ro.vendor.hbm_backlight.enable=true
+ro.vendor.gcp.enable=true
+ro.vendor.fps.switch.thermal=true
+ro.vendor.fps.switch.default=true
+ro.vendor.mi_sf.extra_buffers=1
 
 # Xiaomi touch features
 persist.vendor.touchfeature.gameturbotool.version=v3.5
