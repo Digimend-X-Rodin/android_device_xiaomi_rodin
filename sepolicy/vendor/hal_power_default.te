@@ -1,3 +1,5 @@
+typeattribute hal_power_default mlstrustedsubject;
+
 allow hal_power_default touchfeature_device:chr_file rw_file_perms;
 allow hal_power_default touchfeature_device:file r_file_perms;
 
@@ -16,6 +18,11 @@ allow hal_power_default sysfs_gpu:dir search;
 allow hal_power_default sysfs_gpu:file rw_file_perms;
 allow hal_power_default sysfs_ged:dir search;
 allow hal_power_default sysfs_ged:file rw_file_perms;
+allow hal_power_default self:capability sys_nice;
+allow hal_power_default platform_app:process setsched;
+allow hal_power_default surfaceflinger:process setsched;
+allow hal_power_default appdomain:process setsched;
+allow hal_power_default system_server:process setsched;
 
 # XiaomiParts
 allow hal_power_default vendor_sysfs_cpu_control:file rw_file_perms;
