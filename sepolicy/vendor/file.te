@@ -5,8 +5,6 @@ type vendor_audio_prop, file_type;
 # batteryantiaging
 type batteryantiaging_cache_file, data_file_type, file_type;
 type batteryantiaging_cfg_file, file_type, vendor_file_type;
-type sysfs_battery_supply, fs_type, sysfs_type;
-type vendor_sysfs_battery_supply, fs_type, sysfs_type;
 type sysfs_usb_supply, fs_type, sysfs_type;
 type vendor_sysfs_usb_supply, fs_type, sysfs_type;
 
@@ -57,3 +55,10 @@ type zram_resize_log_file, data_file_type, file_type, core_data_file_type;
 
 # XiaomiParts CPU controls
 type vendor_sysfs_cpu_control, fs_type, sysfs_type;
+
+# --- sysfs_usbpd_device ---
+type sysfs_usbpd_device, fs_type, sysfs_type;
+
+# --- vendor_sysfs_battery_supply ---
+type vendor_sysfs_battery_supply, fs_type, sysfs_type;
+
