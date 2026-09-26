@@ -22,6 +22,7 @@ PATCHES=(
     "packages/modules/Bluetooth 0001-Add-L2CAP-and-A2DP-offload-coex-mechanism-for-MTK.patch"
     "build/soong 0001-Simplify-package-allowlist-by-consolidating-vendor-e.patch"
     "system/core fenrir_vbmeta_combined.patch"
+    "system/sepolicy 0001-sepolicy-Allow-system_server-to-access-sysfs_battery.patch"
 )
 
 for entry in "${PATCHES[@]}"; do

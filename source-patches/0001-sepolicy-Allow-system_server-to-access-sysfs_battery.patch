@@ -1,0 +1,45 @@
+From 6d0e33a379b584e16ee8135904d1d7ce07c1bdae Mon Sep 17 00:00:00 2001
+From: kenway214 <kenway214@outlook.com>
+Date: Sun, 14 Jun 2026 01:21:24 +0530
+Subject: [PATCH] sepolicy: Allow system_server to access sysfs_batteryinfo
+
+Signed-off-by: kenway214 <kenway214@outlook.com>
+Signed-off-by: Ghosuto <clash.raja10@gmail.com>
+---
+ private/domain.te | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
+
+diff --git a/private/domain.te b/private/domain.te
+index f51cdb5b2..a011f8c1f 100644
+--- a/private/domain.te
++++ b/private/domain.te
+@@ -1618,25 +1618,7 @@ neverallow {
+   -coredomain
+ } mnt_product_file:dir *;
+ 
+-# Platform must not have access to sysfs_batteryinfo, but should do it via health HAL
+-full_treble_only(`
+-  neverallow {
+-    coredomain
+-    -shell
+-    # For access to block device information under /sys/class/block.
+-    -apexd
+-    # Read sysfs block device information.
+-    -init
+-    # Generate uevents for health info
+-    -ueventd
+-    # Recovery uses health HAL passthrough implementation.
+-    -recovery
+-    # Charger uses health HAL passthrough implementation.
+-    -charger
+-    # TODO(b/110891300): remove this exception
+-    -incidentd
+-  } sysfs_batteryinfo:file { open read };
+-')
++
+ 
+ neverallow {
+   domain
+-- 
+2.54.0
+
