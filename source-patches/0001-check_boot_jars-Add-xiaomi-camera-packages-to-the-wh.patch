@@ -1,0 +1,24 @@
+From 9420652cc737ed2ccdf6aecaa714702f361dd72f Mon Sep 17 00:00:00 2001
+From: Omkar Parte <rakmoparte@gmail.com>
+Date: Mon, 28 Sep 2026 00:44:27 +0530
+Subject: [PATCH] check_boot_jars: Add xiaomi camera packages to the whitelist
+
+---
+ scripts/check_boot_jars/package_allowed_list.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/scripts/check_boot_jars/package_allowed_list.txt b/scripts/check_boot_jars/package_allowed_list.txt
+index 335d29c59..3e3d15859 100644
+--- a/scripts/check_boot_jars/package_allowed_list.txt
++++ b/scripts/check_boot_jars/package_allowed_list.txt
+@@ -244,3 +244,7 @@ qcom.fmradio
+ ###################################################
+ # IFAA Manager used for Alipay and/or WeChat payment
+ org\.ifaa\.android\.manager.*
++
++# Xiaomi adds
++com\.xiaomi\..*
++com\.camera\..*
+-- 
+2.54.0
+

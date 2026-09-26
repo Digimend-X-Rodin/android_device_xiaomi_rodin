@@ -20,6 +20,7 @@ PATCHES=(
     "packages/apps/Aperture 0001-Aperture-Enable-MediaTek-HFPS-Mode-for-60-FPS-video-.patch"
     "packages/apps/Aperture 0001-DNM-Aperture-Enable-MediaTek-EIS-and-EIS-preview-mod.patch"
     "packages/modules/Bluetooth 0001-Add-L2CAP-and-A2DP-offload-coex-mechanism-for-MTK.patch"
+    "build/soong 0001-check_boot_jars-Add-xiaomi-camera-packages-to-the-wh.patch"
 )
 
 for entry in "${PATCHES[@]}"; do
