@@ -111,6 +111,9 @@ PRODUCT_COPY_FILES += \
 
 $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
 
+# Legacy MediaTek audio parameter compatibility
+$(call soong_config_set_bool,libaudiohal_legacy_raw,mtk_legacy_raw_vendor_parameters,true)
+
 # Bluetooth
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth-service.mediatek
