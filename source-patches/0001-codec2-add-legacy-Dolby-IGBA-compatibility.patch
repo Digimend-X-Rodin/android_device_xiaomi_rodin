@@ -1,0 +1,134 @@
+From 1442a13e86e985ab5f5c4c3d32a6cb7ec4108437 Mon Sep 17 00:00:00 2001
+From: klozz <carlosj@klozz.dev>
+Date: Fri, 28 Aug 2026 11:20:09 +0000
+Subject: [PATCH] codec2: add legacy Dolby IGBA compatibility
+
+Keep Dolby Vision on a registered IGBA block pool while using
+DEFAULT_GRAPHIC as the backing allocator for legacy vendor blobs.
+
+This restores proper buffer backpressure and prevents runaway secure
+buffer allocation without affecting devices that do not enable the
+compatibility flag.
+
+Signed-off-by: klozz <carlosj@klozz.dev>
+---
+ media/codec2/vndk/Android.bp  | 26 ++++++++++++++++++++++++++
+ media/codec2/vndk/C2Store.cpp | 35 ++++++++++++++++++++++++++++++++---
+ 2 files changed, 58 insertions(+), 3 deletions(-)
+
+diff --git a/media/codec2/vndk/Android.bp b/media/codec2/vndk/Android.bp
+index a8308cfcfd..3b8a9e2955 100644
+--- a/media/codec2/vndk/Android.bp
++++ b/media/codec2/vndk/Android.bp
+@@ -7,6 +7,31 @@ package {
+     default_applicable_licenses: ["frameworks_av_license"],
+ }
+ 
++
++// Device-specific Codec2 compatibility flags.
++soong_config_module_type {
++    name: "codec2_compat_cc_defaults",
++    module_type: "cc_defaults",
++    config_namespace: "codec2_compat",
++    bool_variables: [
++        "legacy_dolby_igba",
++    ],
++    properties: [
++        "cflags",
++    ],
++}
++
++codec2_compat_cc_defaults {
++    name: "codec2_compat_defaults",
++    soong_config_variables: {
++        legacy_dolby_igba: {
++            cflags: [
++                "-DCODEC2_LEGACY_DOLBY_IGBA",
++            ],
++        },
++    },
++}
++
+ cc_library_headers {
+     name: "libcodec2_internal",
+ 
+@@ -55,6 +80,7 @@ cc_library {
+     defaults: [
+         "aconfig_lib_cc_static_link.defaults",
+         "libcodec2_hal_selection",
++        "codec2_compat_defaults",
+     ],
+ 
+     srcs: [
+diff --git a/media/codec2/vndk/C2Store.cpp b/media/codec2/vndk/C2Store.cpp
+index bd4b9356bf..c8f6cac07a 100644
+--- a/media/codec2/vndk/C2Store.cpp
++++ b/media/codec2/vndk/C2Store.cpp
+@@ -41,6 +41,9 @@
+ #endif
+ 
+ #include <dlfcn.h>
++#ifdef CODEC2_LEGACY_DOLBY_IGBA
++#include <cstring>
++#endif
+ #include <unistd.h> // getpagesize
+ 
+ #include <map>
+@@ -536,6 +539,13 @@ static C2PooledBlockPool::BufferPoolVer GetBufferPoolVer() {
+     return sVer;
+ }
+ 
++#ifdef CODEC2_LEGACY_DOLBY_IGBA
++static bool IsDolbyVisionService() {
++    const char* name = getprogname();
++    return name && strcmp(name, "vendor.dolby.media.c2-service-vision") == 0;
++}
++#endif
++
+ class _C2BlockPoolCache {
+ public:
+     _C2BlockPoolCache() : mBlockPoolSeqId(C2BlockPool::PLATFORM_START + 1) {
+@@ -632,9 +642,19 @@ private:
+                            components.begin(), components.end());
+                 }
+                 break;
+-            case C2PlatformAllocatorStore::IGBA:
+-                res = allocatorStore->fetchAllocator(
+-                        C2PlatformAllocatorStore::IGBA, &allocator);
++            case C2PlatformAllocatorStore::IGBA: {
++                C2PlatformAllocatorStore::id_t backingAllocatorId =
++                        C2PlatformAllocatorStore::IGBA;
++
++#ifdef CODEC2_LEGACY_DOLBY_IGBA
++                const bool dolby = IsDolbyVisionService();
++                if (dolby) {
++                    // Preserve the registered IGBA pool while using the working GRALLOC backing.
++                    backingAllocatorId = C2AllocatorStore::DEFAULT_GRAPHIC;
++                }
++#endif
++
++                res = allocatorStore->fetchAllocator(backingAllocatorId, &allocator);
+                 if (res == C2_OK) {
+                     bool blockFence =
+                             (components.size() == 1 && allocatorParam.blockFenceSupport);
+@@ -648,8 +668,17 @@ private:
+                     mComponents[poolId].insert(
+                            mComponents[poolId].end(),
+                            components.begin(), components.end());
++
++#ifdef CODEC2_LEGACY_DOLBY_IGBA
++                    if (dolby) {
++                        ALOGW("Dolby IGBA compat: poolId=%llu backingAllocator=%u",
++                              static_cast<unsigned long long>(poolId),
++                              static_cast<unsigned>(ptr->getAllocatorId()));
++                    }
++#endif
+                 }
+                 break;
++            }
+             default:
+                 // Try to create block pool from platform store plugins.
+                 std::shared_ptr<C2BlockPool> ptr;
+-- 
+2.54.0
+
