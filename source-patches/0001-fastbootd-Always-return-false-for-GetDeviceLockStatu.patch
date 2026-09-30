@@ -1,0 +1,53 @@
+From 4b77f1a1f445ca384d0147c67fd0cceff7a9b431 Mon Sep 17 00:00:00 2001
+From: Omkar Parte <rakmoparte@gmail.com>
+Date: Sat, 19 Sep 2026 14:34:59 +0530
+Subject: [PATCH] fastbootd: Always return false for GetDeviceLockStatus()
+ fenrir lks can still flash stuff through bootloader and fastboot
+
+Change-Id: Ica59dab533555af1d12c62b9cc71de55d5b51146
+
+[Shirayuki39]: Make it configurable via soong config
+
+Signed-off-by: Shirayuki39 <lorddemecrius83@proton.me>
+Signed-off-by: Ghosuto <clash.raja10@gmail.com>
+---
+ fastboot/Android.bp         | 5 +++++
+ fastboot/device/utility.cpp | 6 +++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/fastboot/Android.bp b/fastboot/Android.bp
+index 263674330..708a36f5c 100644
+--- a/fastboot/Android.bp
++++ b/fastboot/Android.bp
+@@ -156,6 +156,11 @@ cc_binary {
+         default: [],
+     }),
+ 
++    cppflags: select(soong_config_variable("fastbootd", "bypass_lock_state"), {
++        true: ["-DFASTBOOT_BYPASS_LOCK_STATE"],
++        default: [],
++    }),
++
+     srcs: [
+         "device/commands.cpp",
+         "device/fastboot_device.cpp",
+diff --git a/fastboot/device/utility.cpp b/fastboot/device/utility.cpp
+index e12ee6479..3c5726d5b 100644
+--- a/fastboot/device/utility.cpp
++++ b/fastboot/device/utility.cpp
+@@ -195,7 +195,11 @@ std::vector<std::string> ListPartitions(FastbootDevice* device) {
+ }
+ 
+ bool GetDeviceLockStatus() {
+-    return android::base::GetProperty("ro.boot.verifiedbootstate", "") != "orange";
++#ifdef FASTBOOT_BYPASS_LOCK_STATE
++    return false;
++#else
++    return android::base::GetProperty("ro.boot.verifiedbootstate", "") == "green";
++#endif
+ }
+ 
+ bool UpdateAllPartitionMetadata(FastbootDevice* device, const std::string& super_name,
+-- 
+2.54.0
+

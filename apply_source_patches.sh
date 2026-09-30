@@ -22,6 +22,8 @@ PATCHES=(
     "packages/modules/Bluetooth 0001-Add-L2CAP-and-A2DP-offload-coex-mechanism-for-MTK.patch"
     "build/soong 0001-check_boot_jars-Add-xiaomi-camera-packages-to-the-wh.patch"
     "frameworks/av 0001-codec2-add-legacy-Dolby-IGBA-compatibility.patch"
+    "system/core 0001-fastbootd-Always-return-false-for-GetDeviceLockStatu.patch"
+    "system/fs/fs_mgr 0001-libfs_avb-Allow-LKs-patched-with-fenrir-to-boot-on-A.patch"
 )
 
 for entry in "${PATCHES[@]}"; do
