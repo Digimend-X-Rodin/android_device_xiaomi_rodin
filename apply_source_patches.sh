@@ -25,6 +25,7 @@ PATCHES=(
     "system/core 0001-fastbootd-Always-return-false-for-GetDeviceLockStatu.patch"
     "system/fs/fs_mgr 0001-libfs_avb-Allow-LKs-patched-with-fenrir-to-boot-on-A.patch"
     "system/sepolicy 0001-sepolicy-Allow-system_server-to-access-sysfs_battery.patch"
+    "hardware/clover/interfaces 0001-Add-touch.patch"
 )
 
 for entry in "${PATCHES[@]}"; do
