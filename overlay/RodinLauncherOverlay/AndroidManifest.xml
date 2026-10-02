@@ -4,10 +4,10 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.launcher.overlay.rodin">
+    package="com.google.android.apps.nexuslauncher.overlay.rodin">
 
     <overlay
         android:isStatic="true"
-        android:priority="550"
-        android:targetPackage="com.android.launcher3" />
+        android:priority="99"
+        android:targetPackage="com.google.android.apps.nexuslauncher" />
 </manifest>
