@@ -234,7 +234,10 @@ blob_fixups: blob_fixups_user_type = {
     'vendor/lib64/hw/android.hardware.audio.effect.aidl-impl-mediatek.so': blob_fixup()
         .replace_needed('android.media.audio.common.types-V5-ndk.so', 'android.media.audio.common.types-V3-ndk.so')
         .replace_needed('libtinyxml2.so', 'libtinyxml2-v36.so'),
-    'vendor/lib64/hw/android.hardware.soundtrigger3-impl.so': blob_fixup()
+    (
+        'vendor/lib64/hw/android.hardware.soundtrigger3-impl.so',
+        'vendor/lib64/libmisoundfx_mtk_aidl_ext.so'
+    ): blob_fixup()
         .replace_needed('libaudio_aidl_conversion_common_ndk.so', 'libaudio_aidl_conversion_common_ndk_prebuilt.so'),
     'vendor/lib64/hw/hwcomposer.mtk_common.so': blob_fixup()
         .add_needed('libprocessgroup_shim.so')
