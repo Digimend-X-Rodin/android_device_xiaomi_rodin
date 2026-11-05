@@ -23,6 +23,7 @@ PATCHES=(
     "build/soong 0001-Simplify-package-allowlist-by-consolidating-vendor-e.patch"
     "system/core fenrir_vbmeta_combined.patch"
     "system/sepolicy 0001-sepolicy-Allow-system_server-to-access-sysfs_battery.patch"
+    "frameworks/native lunaris_blur_optimizations_rodin.patch"
 )
 
 for entry in "${PATCHES[@]}"; do

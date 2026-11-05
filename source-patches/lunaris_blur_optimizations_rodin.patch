@@ -1,0 +1,1127 @@
+From 038edd52977cc28abad89a376373024d45d793c1 Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 07:24:14 +0000
+Subject: [PATCH 1/7] renderengine: Discard full-coverage Darkmoon passes
+ before drawing
+
+KawaseDarkmoon overwrites each pass target with a kSrc draw when alpha is 1,
+so the old contents are not needed. Discarding the target first avoids
+loading them, which costs DRAM bandwidth on tile-based GPUs.
+
+A pass that is clipped to its content area is left as it was, because pixels
+outside the clip keep their contents. The output is unchanged.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ libs/renderengine/skia/filters/KawaseDarkmoon.cpp | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/libs/renderengine/skia/filters/KawaseDarkmoon.cpp b/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
+index 30ccaafeb7..7fad6990cc 100644
+--- a/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
++++ b/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
+@@ -216,7 +216,14 @@ void KawaseDarkmoon::blurInto(const sk_sp<SkSurface>& drawSurface, SkISize drawC
+ 
+     SkCanvas* canvas = drawSurface->getCanvas();
+     SkAutoCanvasRestore autoRestore(canvas, true);
+-    if (isOversized(drawSurface, drawContent)) {
++    const bool oversized = isOversized(drawSurface, drawContent);
++    if (alpha == 1.0f && !oversized) {
++        // The kSrc draw overwrites every pixel, so the old contents are not needed. Discarding first
++        // avoids loading them, which costs DRAM bandwidth on tile-based GPUs. Not done when the draw is
++        // clipped, since pixels outside the clip keep their contents.
++        canvas->discard();
++    }
++    if (oversized) {
+         canvas->clipRect(SkRect::Make(drawContent));
+     }
+     canvas->drawPaint(paint);
+-- 
+2.54.0
+
+
+From 506311aff1ecf2e79b781b7693145d346f2ec9cc Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 07:25:22 +0000
+Subject: [PATCH 2/7] renderengine: Share the KawaseDarkmoon downsample chain
+ between a layer's blurs
+
+A layer can need several blurs of the same input: its background at one
+radius, and blur regions at other radii. Each one previously ran the whole
+Darkmoon pipeline, including the downsample passes.
+
+The downsample passes do not depend on the blur radius. Only the upsample
+passes and their step do. The levels for one input and rectangle are now
+computed once and reused by every blur of the layer. Each radius runs only its
+own upsample passes, which removes about half the passes for every blur after
+the first.
+
+The shared levels live in their own cache, and the upsample targets in a
+second one, so an upsample pass never overwrites a level another radius still
+needs. Only one prepared input is in use at a time. The layer blur block
+prepares one, uses it for all of its blurs, and drops it before the next layer.
+A generation check makes an input that has been overtaken fail safely instead
+of reading the wrong levels.
+
+The arithmetic is the same as in generateTemporaryImage, so the output is
+unchanged. Protected content keeps the existing path. Filters that do not
+implement the new interface keep their behaviour.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ libs/renderengine/skia/SkiaRenderEngine.cpp   |  21 ++-
+ libs/renderengine/skia/filters/BlurFilter.h   |  19 ++
+ .../skia/filters/KawaseDarkmoon.cpp           | 177 ++++++++++++++++++
+ .../skia/filters/KawaseDarkmoon.h             |  14 ++
+ 4 files changed, 224 insertions(+), 7 deletions(-)
+
+diff --git a/libs/renderengine/skia/SkiaRenderEngine.cpp b/libs/renderengine/skia/SkiaRenderEngine.cpp
+index c1d3db36d2..279fa59a6a 100644
+--- a/libs/renderengine/skia/SkiaRenderEngine.cpp
++++ b/libs/renderengine/skia/SkiaRenderEngine.cpp
+@@ -1050,16 +1050,25 @@ void SkiaRenderEngine::drawLayersInternal(
+                     }
+                 }
+ 
++                // The blurs of this layer share one input. A filter that supports it computes the
++                // downsampling once for all of them.
++                std::unique_ptr<BlurFilter::PreparedBlurInput> preparedInput =
++                        mBlurFilter->prepareBlurInput(context, display, blurInput, blurRect);
++                auto generateBlur = [&](uint32_t radius) -> sk_sp<SkImage> {
++                    if (preparedInput) {
++                        return mBlurFilter->generateFromPreparedInput(*preparedInput, radius);
++                    }
++                    return mBlurFilter->generateTemporaryImage(context, display, radius, blurInput,
++                                                               blurRect);
++                };
++
+                 sk_sp<SkImage> temporaryBlurredImage = nullptr; // Might be reused by blur regions.
+                 if (layer.backgroundBlurRadius > 0) {
+                     SFTRACE_NAME("BackgroundBlur");
+                     // Result is only valid until the next call to generateTemporaryImage (for a
+                     // given BlurFilter). Safe to invalidate after all desired drawBlurRegion
+                     // invocations have been made for a particular blurred SkImage.
+-                    temporaryBlurredImage =
+-                            mBlurFilter->generateTemporaryImage(context, display,
+-                                                                layer.backgroundBlurRadius,
+-                                                                blurInput, blurRect);
++                    temporaryBlurredImage = generateBlur(layer.backgroundBlurRadius);
+ 
+                     mBlurFilter->drawBlurRegion(canvas, bounds, layer.backgroundBlurRadius,
+                                                 layer.backgroundBlurScale, 1.0f, blurRect,
+@@ -1109,9 +1118,7 @@ void SkiaRenderEngine::drawLayersInternal(
+                     for (const auto& [radius, regions] : regionsPerRadius) {
+                         {
+                             SFTRACE_NAME("BlurRegion");
+-                            temporaryBlurredImage =
+-                                    mBlurFilter->generateTemporaryImage(context, display, radius,
+-                                                                        blurInput, blurRect);
++                            temporaryBlurredImage = generateBlur(radius);
+                         }
+                         for (const BlurRegion& region : regions) {
+                             drawRegion(temporaryBlurredImage, region);
+diff --git a/libs/renderengine/skia/filters/BlurFilter.h b/libs/renderengine/skia/filters/BlurFilter.h
+index 2c9cb00586..e5215c58d4 100644
+--- a/libs/renderengine/skia/filters/BlurFilter.h
++++ b/libs/renderengine/skia/filters/BlurFilter.h
+@@ -16,6 +16,8 @@
+ 
+ #pragma once
+ 
++#include <memory>
++
+ #include <SkCanvas.h>
+ #include <SkImage.h>
+ #include <SkMatrix.h>
+@@ -70,6 +72,23 @@ public:
+ 
+     float getMaxCrossFadeRadius() const;
+ 
++    // Lets the blurs of one layer share the work they have in common. A filter that cannot share
++    // returns nullptr, and the caller then uses generateTemporaryImage as before.
++    class PreparedBlurInput {
++    public:
++        virtual ~PreparedBlurInput() {}
++    };
++    virtual std::unique_ptr<PreparedBlurInput> prepareBlurInput(SkiaGpuContext* context,
++                                                                const DisplaySettings& display,
++                                                                const sk_sp<SkImage>& input,
++                                                                const SkRect& blurRect) const {
++        return nullptr;
++    }
++    virtual sk_sp<SkImage> generateFromPreparedInput(PreparedBlurInput& prepared,
++                                                     uint32_t blurRadius) const {
++        return nullptr;
++    }
++
+     virtual void preallocateBuffers(SkiaGpuContext* context, ui::Size size) {}
+     virtual bool areBuffersPreallocated(const SkiaGpuContext* context, ui::Size displaySize) const {
+         return true;
+diff --git a/libs/renderengine/skia/filters/KawaseDarkmoon.cpp b/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
+index 7fad6990cc..cf6fdf5270 100644
+--- a/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
++++ b/libs/renderengine/skia/filters/KawaseDarkmoon.cpp
+@@ -229,6 +229,183 @@ void KawaseDarkmoon::blurInto(const sk_sp<SkSurface>& drawSurface, SkISize drawC
+     canvas->drawPaint(paint);
+ }
+ 
++// The downsampled levels of one blur input. They depend only on the input and the rectangle, never on
++// the blur radius, so the blurs of one layer can share them. Each radius then runs only its upsample
++// passes. The levels live in mSharedDownCache, which holds one prepared input at a time. The layer blur
++// block prepares one, uses it for all of its blurs, and drops it before the next layer.
++class KawaseDarkmoon::PreparedInput : public BlurFilter::PreparedBlurInput {
++public:
++    PreparedInput(const KawaseDarkmoon* filter, SkiaGpuContext* context,
++                  const DisplaySettings& display, const sk_sp<SkImage>& input,
++                  const SkRect& blurRect, uint64_t generation)
++          : mFilter(filter), mContext(context), mInput(input), mGeneration(generation) {
++        SkIRect targetBlurRect;
++        blurRect.roundIn(&targetBlurRect);
++        mBlurRect = blurRect;
++        mInputClamp = SkRect::Make(targetBlurRect);
++        mFullRes = targetBlurRect.size();
++        mDisplaySize = SkISize::Make(display.physicalDisplay.width(), display.physicalDisplay.height());
++        mHintFromDisplay = !mDisplaySize.isEmpty();
++        mBaseInfo = input->imageInfo();
++        for (int i = 0; i < kMaxSurfaces; i++) {
++            mContentSizes[i] = levelSize(mFullRes, i);
++        }
++    }
++
++    SkiaGpuContext* context() const { return mContext; }
++    const sk_sp<SkImage>& input() const { return mInput; }
++    const SkImageInfo& baseInfo() const { return mBaseInfo; }
++    SkISize contentSize(int i) const { return mContentSizes[i]; }
++    const sk_sp<SkSurface>& level(int i) const { return mFilter->mSharedDownCache.surfaces[i]; }
++
++    SkISize preferredSize(int i) const {
++        SkISize preferred = mContentSizes[i];
++        if (mHintFromDisplay) {
++            const SkISize displayLevel = levelSize(mDisplaySize, i);
++            preferred.fWidth = std::max(preferred.width(), displayLevel.width());
++            preferred.fHeight = std::max(preferred.height(), displayLevel.height());
++        }
++        return preferred;
++    }
++
++    // Makes levels 0..depth available. Returns false if a target could not be created, or if another
++    // layer has taken the shared levels since this input was prepared.
++    bool ensureLevels(int depth) {
++        if (mFilter->mChainGeneration != mGeneration) {
++            return false;
++        }
++        for (; mComputedLevels <= depth; mComputedLevels++) {
++            const int i = mComputedLevels;
++            if (!mFilter->ensureSurface(mFilter->mSharedDownCache, i, mContext, mBaseInfo,
++                                        mContentSizes[i], preferredSize(i))) {
++                return false;
++            }
++            if (i == 0) {
++                // Skia's local matrix maps shader space -> destination, hence translate-then-scale.
++                SkMatrix blurMatrix = SkMatrix::Translate(-mBlurRect.fLeft, -mBlurRect.fTop);
++                blurMatrix.postScale(kInputScale, kInputScale);
++                mFilter->blurInto(mFilter->mSharedDownCache.surfaces[0], mContentSizes[0],
++                                  mInput->makeShader(SkTileMode::kClamp, SkTileMode::kClamp,
++                                                     kLinearSampling),
++                                  &mInputClamp, blurMatrix, 0, 1.0f,
++                                  mFilter->mQuarterResDownSampleBlurEffect);
++            } else {
++                const SkISize src = mContentSizes[i - 1];
++                const SkISize dst = mContentSizes[i];
++                const SkMatrix toDest =
++                        SkMatrix::Scale(static_cast<float>(dst.width()) / src.width(),
++                                        static_cast<float>(dst.height()) / src.height());
++                const SkRect srcClamp = SkRect::Make(src);
++                const sk_sp<SkSurface>& prev = mFilter->mSharedDownCache.surfaces[i - 1];
++                const bool clampSrc = isOversized(prev, src);
++                mFilter->blurInto(mFilter->mSharedDownCache.surfaces[i], dst,
++                                  prev->makeTemporaryImage()->makeShader(
++                                          SkTileMode::kClamp, SkTileMode::kClamp, kLinearSampling),
++                                  clampSrc ? &srcClamp : nullptr, toDest, 0, 1.0f,
++                                  mFilter->mHalfResDownSampleBlurEffect);
++            }
++        }
++        return true;
++    }
++
++private:
++    const KawaseDarkmoon* mFilter;
++    SkiaGpuContext* mContext;
++    sk_sp<SkImage> mInput;
++    uint64_t mGeneration;
++    SkRect mBlurRect;
++    SkRect mInputClamp;
++    SkISize mFullRes = SkISize::MakeEmpty();
++    SkISize mDisplaySize = SkISize::MakeEmpty();
++    bool mHintFromDisplay = false;
++    SkImageInfo mBaseInfo;
++    SkISize mContentSizes[kMaxSurfaces];
++    int mComputedLevels = 0;
++};
++
++std::unique_ptr<BlurFilter::PreparedBlurInput> KawaseDarkmoon::prepareBlurInput(
++        SkiaGpuContext* context, const DisplaySettings& display, const sk_sp<SkImage>& input,
++        const SkRect& blurRect) const {
++    // Protected content takes the transient path, so it cannot share levels.
++    if (!context || !input || context->supportsProtectedContent()) {
++        return nullptr;
++    }
++    if (mSharedDownCache.context != context) {
++        mSharedDownCache.reset();
++        mSharedDownCache.context = context;
++    }
++    if (mSharedUpCache.context != context) {
++        mSharedUpCache.reset();
++        mSharedUpCache.context = context;
++    }
++    const uint64_t generation = ++mChainGeneration;
++    return std::make_unique<PreparedInput>(this, context, display, input, blurRect, generation);
++}
++
++sk_sp<SkImage> KawaseDarkmoon::generateFromPreparedInput(BlurFilter::PreparedBlurInput& prepared,
++                                                         uint32_t blurRadius) const {
++    SFTRACE_CALL();
++    PreparedInput& p = static_cast<PreparedInput&>(prepared);
++    if (blurRadius == 0) {
++        return p.input();
++    }
++
++    // Same radius and pass arithmetic as generateTemporaryImage, so the result is identical.
++    const float radius = blurRadius * kBlurSigmaScale;
++    const float filterDepth = std::min(kMaxSurfaces - 1.0f, radius * kInputScale / 2.5f);
++    const int filterPasses = std::min(kMaxSurfaces - 1, static_cast<int>(std::ceil(filterDepth)));
++    if (!p.ensureLevels(filterPasses)) {
++        return nullptr;
++    }
++    if (filterPasses == 0) {
++        return p.level(0)->makeTemporaryImage();
++    }
++    float sumSquaredR = 0;
++    float sumSquaredStep = 0;
++    for (int i = 0; i < filterPasses; i++) {
++        const float alpha = std::min(1.0f, filterDepth - i);
++        sumSquaredR += powf(powf(2.0f, i - 1) * alpha * static_cast<float>(M_SQRT2), 2.0f);
++        sumSquaredStep += powf(powf(2.0f, i) * alpha, 2.0f);
++    }
++    const float step = kDiagonalKernelCompensation *
++            sqrtf(std::max(0.0f, powf(radius * kInputScale, 2.0f) - sumSquaredR) /
++                  (sumSquaredStep == 0 ? 1.0f : sumSquaredStep));
++
++
++    // Upsample targets have their own cache, so they never overwrite a shared level.
++    for (int i = 0; i < filterPasses; i++) {
++        if (!ensureSurface(mSharedUpCache, i, p.context(), p.baseInfo(), p.contentSize(i),
++                           p.preferredSize(i))) {
++            return nullptr;
++        }
++    }
++    const sk_sp<SkSurface>* up = mSharedUpCache.surfaces;
++    for (int i = filterPasses - 1; i >= 0; i--) {
++        const SkISize src = p.contentSize(i + 1);
++        const SkISize dst = p.contentSize(i);
++        const SkMatrix toDest = SkMatrix::Scale(static_cast<float>(dst.width()) / src.width(),
++                                                static_cast<float>(dst.height()) / src.height());
++        const SkRect srcClamp = SkRect::Make(src);
++        const sk_sp<SkSurface>& srcSurface = (i + 1 == filterPasses) ? p.level(i + 1) : up[i + 1];
++        const bool clampSrc = isOversized(srcSurface, src);
++        const float alpha = std::min(1.0f, filterDepth - i);
++        if (alpha < 1.0f) {
++            // A partial pass blends with what its target already holds, which must be level i, as in
++            // generateTemporaryImage. The shared upsample target holds an earlier blur's result, so copy
++            // level i into it first.
++            SkPaint copy;
++            copy.setBlendMode(SkBlendMode::kSrc);
++            up[i]->getCanvas()->drawImage(p.level(i)->makeTemporaryImage(), 0, 0,
++                                          SkSamplingOptions(), &copy);
++        }
++        blurInto(up[i], dst,
++                 srcSurface->makeTemporaryImage()->makeShader(SkTileMode::kClamp,
++                                                              SkTileMode::kClamp, kLinearSampling),
++                 clampSrc ? &srcClamp : nullptr, toDest, step, alpha, mUpSampleBlurEffect);
++    }
++    return up[0]->makeTemporaryImage();
++}
++
+ sk_sp<SkImage> KawaseDarkmoon::generateTemporaryImage(SkiaGpuContext* context,
+                                                       const DisplaySettings& display,
+                                                       const uint32_t blurRadius,
+diff --git a/libs/renderengine/skia/filters/KawaseDarkmoon.h b/libs/renderengine/skia/filters/KawaseDarkmoon.h
+index 3a6caf3d1d..c478e95d81 100644
+--- a/libs/renderengine/skia/filters/KawaseDarkmoon.h
++++ b/libs/renderengine/skia/filters/KawaseDarkmoon.h
+@@ -60,6 +60,13 @@ public:
+                                           const uint32_t radius, const sk_sp<SkImage> blurInput,
+                                           const SkRect& blurRect) const override;
+ 
++    std::unique_ptr<PreparedBlurInput> prepareBlurInput(SkiaGpuContext* context,
++                                                        const DisplaySettings& display,
++                                                        const sk_sp<SkImage>& input,
++                                                        const SkRect& blurRect) const override;
++    sk_sp<SkImage> generateFromPreparedInput(PreparedBlurInput& prepared,
++                                             uint32_t blurRadius) const override;
++
+ private:
+     sk_sp<SkShader> makeBlurShader(const sk_sp<SkImage>& blurredImage, const SkMatrix& blurMatrix,
+                                    const SkRect& blurRect) const override;
+@@ -82,6 +89,13 @@ private:
+ 
+     mutable SurfaceCache mUnprotectedCache;
+ 
++    // Levels shared by the blurs of one layer. Only one prepared input is in use at a time, so they
++    // are owned by the filter and identified by a generation.
++    class PreparedInput;
++    mutable SurfaceCache mSharedDownCache;
++    mutable SurfaceCache mSharedUpCache;
++    mutable uint64_t mChainGeneration = 0;
++
+     bool ensureSurface(SurfaceCache& cache, int index, SkiaGpuContext* context,
+                        const SkImageInfo& info, SkISize required, SkISize preferred) const;
+ 
+-- 
+2.54.0
+
+
+From 15c82091a2d9c4429400454478c5ac40c80f28d0 Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 07:26:08 +0000
+Subject: [PATCH 3/7] renderengine: Reuse blur results across frames and skip
+ occluded blurs
+
+Two output-preserving reductions in the blur path of drawLayersInternal. The
+algorithm, shaders and kernels are unchanged.
+
+Result cache. A blur whose inputs have not changed is returned from a small
+cache of four entries instead of being regenerated. A static blurred surface,
+such as an open notification shade, then costs no blur passes on most frames.
+The key covers every input of the blur:
+- the display output dataspace, max luminance and colour transform,
+- for layers below: buffer identity and frame number, solid colour, opaque
+  flag, dataspace and colour transform,
+- for every layer: alpha, blur radius and scale, skipContentDraw, corner
+  state, shadow length, transform, bounds, and blur regions.
+Stacked occlusion reads the layers above, so their blur state is part of the
+key. Results are stored as an owned copy, so the cache never refers to a
+surface that is written again later.
+
+To support the key, the buffer now carries its frame number, which is set
+from the layer frontend for both buffer and clear paths.
+
+Exact occlusion skip. A layer's blur is skipped when an opaque layer above it
+covers its bounds completely, with the same transform, square corners, no
+shadow and no colour transform, and no layer in between has a blur of its
+own. The hidden blur cannot reach the output, so skipping it changes nothing.
+The check is conservative: any doubt keeps the blur.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ .../include/renderengine/LayerSettings.h      |   6 +-
+ libs/renderengine/skia/SkiaRenderEngine.cpp   | 195 +++++++++++++++++-
+ libs/renderengine/skia/SkiaRenderEngine.h     |  11 +
+ services/surfaceflinger/LayerFE.cpp           |   2 +
+ 4 files changed, 207 insertions(+), 7 deletions(-)
+
+diff --git a/libs/renderengine/include/renderengine/LayerSettings.h b/libs/renderengine/include/renderengine/LayerSettings.h
+index 870dc4c180..a5998d5f1d 100644
+--- a/libs/renderengine/include/renderengine/LayerSettings.h
++++ b/libs/renderengine/include/renderengine/LayerSettings.h
+@@ -50,6 +50,9 @@ struct Buffer {
+     // ignored.
+     std::shared_ptr<ExternalTexture> buffer = nullptr;
+ 
++    // Frame number of the buffer. Identifies its content, so a blur cache can tell frames apart.
++    uint64_t frameNumber = 0;
++
+     // Fence that will fire when the buffer is ready to be bound.
+     sp<Fence> fence = nullptr;
+ 
+@@ -174,7 +177,8 @@ struct LayerSettings {
+ // Keep in sync with custom comparison function in
+ // compositionengine/impl/ClientCompositionRequestCache.cpp
+ static inline bool operator==(const Buffer& lhs, const Buffer& rhs) {
+-    return lhs.buffer == rhs.buffer && lhs.fence == rhs.fence &&
++    return lhs.buffer == rhs.buffer && lhs.frameNumber == rhs.frameNumber &&
++            lhs.fence == rhs.fence &&
+             lhs.useTextureFiltering == rhs.useTextureFiltering &&
+             lhs.textureTransform == rhs.textureTransform &&
+             lhs.usePremultipliedAlpha == rhs.usePremultipliedAlpha &&
+diff --git a/libs/renderengine/skia/SkiaRenderEngine.cpp b/libs/renderengine/skia/SkiaRenderEngine.cpp
+index 279fa59a6a..70643213ff 100644
+--- a/libs/renderengine/skia/SkiaRenderEngine.cpp
++++ b/libs/renderengine/skia/SkiaRenderEngine.cpp
+@@ -72,6 +72,8 @@
+ #include <deque>
+ #include <memory>
+ #include <numeric>
++#include <cstring>
++#include <utility>
+ 
+ #include "Cache.h"
+ #include "ColorSpaces.h"
+@@ -244,6 +246,48 @@ static inline std::pair<SkRRect, SkRRect> getBoundsAndClip(
+     return {SkRRect::MakeRect(bounds), clip};
+ }
+ 
++// True when the blur of `layer` cannot be seen in the output, so skipping it leaves the image
++// unchanged. An opaque layer above it must cover its whole bounds, with the same transform, square
++// corners, no shadow and no colour transform. No layer between them may have a blur of its own,
++// because a blur samples the content below it. Scanning stops at the first opaque cover.
++static bool isBlurOccludedByOpaqueLayer(const android::renderengine::LayerSettings& layer,
++                                        const std::vector<android::renderengine::LayerSettings>& layers,
++                                        bool ctModifiesAlpha) {
++    if (ctModifiesAlpha) {
++        return false;
++    }
++    const size_t index = static_cast<size_t>(&layer - layers.data());
++    const auto& b = layer.geometry.boundaries;
++    auto covers = [](const auto& outer, const auto& inner) {
++        return outer.left <= inner.left && outer.top <= inner.top && outer.right >= inner.right &&
++                outer.bottom >= inner.bottom;
++    };
++    for (size_t j = index + 1; j < layers.size(); ++j) {
++        const auto& above = layers[j];
++        if (above.backgroundBlurRadius > 0 || !above.blurRegions.empty()) {
++            return false;
++        }
++        if (above.alpha < 1.0f || above.skipContentDraw) {
++            continue;
++        }
++        if (above.source.buffer.buffer && !above.source.buffer.isOpaque) {
++            continue;
++        }
++        if (!above.geometry.roundedCornersRadii.isEmpty() || above.shadow.length > 0.f) {
++            continue;
++        }
++        if (!(above.colorTransform == android::mat4()) ||
++            !(above.geometry.positionTransform == layer.geometry.positionTransform)) {
++            continue;
++        }
++        const auto& crop = above.geometry.roundedCornersCrop;
++        if (covers(above.geometry.boundaries, b) && (crop.isEmpty() || covers(crop, b))) {
++            return true;
++        }
++    }
++    return false;
++}
++
+ static inline bool layerHasBlur(const android::renderengine::LayerSettings& layer,
+                                 bool colorTransformModifiesAlpha) {
+     if (layer.backgroundBlurRadius > 0 || layer.blurRegions.size()) {
+@@ -368,6 +412,8 @@ SkiaRenderEngine::~SkiaRenderEngine() { }
+ void SkiaRenderEngine::finishRenderingAndAbandonContexts() {
+     std::lock_guard<std::mutex> lock(mRenderingMutex);
+ 
++    mBlurCache.clear();
++
+     if (mBlurFilter) {
+         delete mBlurFilter;
+     }
+@@ -999,7 +1045,8 @@ void SkiaRenderEngine::drawLayersInternal(
+         const auto [bounds, roundRectClip] =
+                 getBoundsAndClip(layer.geometry.boundaries, layer.geometry.roundedCornersCrop,
+                                  layer.geometry.roundedCornersRadii);
+-        if (mBlurFilter && layerHasBlur(layer, ctModifiesAlpha)) {
++        if (mBlurFilter && layerHasBlur(layer, ctModifiesAlpha) &&
++            !isBlurOccludedByOpaqueLayer(layer, layers, ctModifiesAlpha)) {
+             // rect to be blurred in the coordinate space of blurInput
+             SkRect blurRect = canvas->getTotalMatrix().mapRect(bounds.rect());
+ 
+@@ -1062,17 +1109,145 @@ void SkiaRenderEngine::drawLayersInternal(
+                                                                blurRect);
+                 };
+ 
++                // Hash of every input to the blur: the content below the layer, and the blur state
++                // of every layer, since stacked occlusion reads the layers above. Uncacheable if a
++                // buffer below has no frame number.
++                auto computeBlurInputHash = [&]() -> std::pair<bool, uint64_t> {
++                    uint64_t h = 14695981039346656037ULL;
++                    const auto mix = [&h](uint64_t v) {
++                        h ^= v;
++                        h *= 1099511628211ULL;
++                    };
++                    const auto mixFloat = [&mix](float f) {
++                        uint32_t bits;
++                        std::memcpy(&bits, &f, sizeof(f));
++                        mix(bits);
++                    };
++                    mix(static_cast<uint32_t>(display.outputDataspace));
++                    mixFloat(display.maxLuminance);
++                    for (int r = 0; r < 4; ++r) {
++                        for (int c = 0; c < 4; ++c) {
++                            mixFloat(float(display.colorTransform[r][c]));
++                        }
++                    }
++                    for (const auto& l : layers) {
++                        if (&l == &layer) continue;
++                        if (&l < &layer) {
++                            if (l.source.buffer.buffer) {
++                                if (l.source.buffer.frameNumber == 0) {
++                                    return {false, 0};
++                                }
++                                mix(l.source.buffer.buffer->getId());
++                                mix(l.source.buffer.frameNumber);
++                            }
++                            mixFloat(float(l.source.solidColor.r));
++                            mixFloat(float(l.source.solidColor.g));
++                            mixFloat(float(l.source.solidColor.b));
++                            mix(static_cast<uint32_t>(l.source.buffer.isOpaque));
++                            mix(static_cast<uint32_t>(l.sourceDataspace));
++                            for (int r = 0; r < 4; ++r) {
++                                for (int c = 0; c < 4; ++c) {
++                                    mixFloat(float(l.colorTransform[r][c]));
++                                }
++                            }
++                        }
++                        mixFloat(float(l.alpha));
++                        mix(static_cast<uint32_t>(l.backgroundBlurRadius));
++                        mixFloat(l.backgroundBlurScale);
++                        mix(static_cast<uint32_t>(l.skipContentDraw));
++                        mix(static_cast<uint32_t>(l.geometry.roundedCornersRadii.isEmpty()));
++                        mixFloat(l.shadow.length);
++                        for (int r = 0; r < 4; ++r) {
++                            for (int c = 0; c < 4; ++c) {
++                                mixFloat(float(l.geometry.positionTransform[r][c]));
++                            }
++                        }
++                        mixFloat(l.geometry.boundaries.left);
++                        mixFloat(l.geometry.boundaries.top);
++                        mixFloat(l.geometry.boundaries.right);
++                        mixFloat(l.geometry.boundaries.bottom);
++                        mix(static_cast<uint64_t>(l.blurRegions.size()));
++                        for (const BlurRegion& region : l.blurRegions) {
++                            mix(region.blurRadius);
++                            mixFloat(region.cornerRadiusTL);
++                            mixFloat(region.cornerRadiusTR);
++                            mixFloat(region.cornerRadiusBL);
++                            mixFloat(region.cornerRadiusBR);
++                            mixFloat(region.alpha);
++                            mix(static_cast<uint32_t>(region.left));
++                            mix(static_cast<uint32_t>(region.top));
++                            mix(static_cast<uint32_t>(region.right));
++                            mix(static_cast<uint32_t>(region.bottom));
++                        }
++                    }
++                    return {true, h};
++                };
++
++                auto lookupBlurCache = [&](uint32_t radius, const SkIRect& rect,
++                                           uint64_t inputHash) -> sk_sp<SkImage> {
++                    for (auto it = mBlurCache.begin(); it != mBlurCache.end(); ++it) {
++                        if (it->blurRadius == radius && it->inputHash == inputHash &&
++                            it->blurRect == rect) {
++                            sk_sp<SkImage> img = it->image;
++                            if (it != mBlurCache.begin()) {
++                                BlurCacheEntry entry = std::move(*it);
++                                mBlurCache.erase(it);
++                                mBlurCache.push_front(std::move(entry));
++                            }
++                            return img;
++                        }
++                    }
++                    return nullptr;
++                };
++
++                auto storeBlurCache = [&](sk_sp<SkImage> image, uint32_t radius,
++                                          const SkIRect& rect, uint64_t inputHash) {
++                    // The cache keeps its own copy. A reference to a pooled or shared surface would
++                    // be copied on every write to that surface while the entry lives. One copy per
++                    // miss is cheaper.
++                    if (context) {
++                        if (sk_sp<SkSurface> owned = context->createRenderTarget(image->imageInfo())) {
++                            owned->getCanvas()->drawImage(image, 0, 0);
++                            image = owned->makeImageSnapshot();
++                        }
++                    }
++                    mBlurCache.push_front({std::move(image), inputHash, radius, rect});
++                    if (mBlurCache.size() > kBlurCacheMaxEntries) {
++                        mBlurCache.pop_back();
++                    }
++                };
++
++                const SkIRect blurRectI = blurRect.roundOut();
++                const auto [cacheableBlurInput, blurInputHash] = computeBlurInputHash();
++
++                // A cached result is used when every input matches. Otherwise the blur is generated
++                // and stored.
++                auto blurWithCache = [&](uint32_t radius) -> sk_sp<SkImage> {
++                    if (cacheableBlurInput) {
++                        if (sk_sp<SkImage> cached = lookupBlurCache(radius, blurRectI, blurInputHash)) {
++                            return cached;
++                        }
++                    }
++                    sk_sp<SkImage> result = generateBlur(radius);
++                    if (result && cacheableBlurInput) {
++                        storeBlurCache(result, radius, blurRectI, blurInputHash);
++                    }
++                    return result;
++                };
++
+                 sk_sp<SkImage> temporaryBlurredImage = nullptr; // Might be reused by blur regions.
+                 if (layer.backgroundBlurRadius > 0) {
+                     SFTRACE_NAME("BackgroundBlur");
+                     // Result is only valid until the next call to generateTemporaryImage (for a
+                     // given BlurFilter). Safe to invalidate after all desired drawBlurRegion
+                     // invocations have been made for a particular blurred SkImage.
+-                    temporaryBlurredImage = generateBlur(layer.backgroundBlurRadius);
++                    temporaryBlurredImage = blurWithCache(layer.backgroundBlurRadius);
+ 
+-                    mBlurFilter->drawBlurRegion(canvas, bounds, layer.backgroundBlurRadius,
+-                                                layer.backgroundBlurScale, 1.0f, blurRect,
+-                                                temporaryBlurredImage, blurInput);
++                    if (temporaryBlurredImage) {
++                        mBlurFilter->drawBlurRegion(canvas, bounds, layer.backgroundBlurRadius,
++                                                    layer.backgroundBlurScale, 1.0f, blurRect,
++                                                    temporaryBlurredImage, blurInput);
++                    }
+                 }
+ 
+                 if (layer.blurRegions.size()) {
+@@ -1118,7 +1293,10 @@ void SkiaRenderEngine::drawLayersInternal(
+                     for (const auto& [radius, regions] : regionsPerRadius) {
+                         {
+                             SFTRACE_NAME("BlurRegion");
+-                            temporaryBlurredImage = generateBlur(radius);
++                            temporaryBlurredImage = blurWithCache(radius);
++                        }
++                        if (!temporaryBlurredImage) {
++                            continue;
+                         }
+                         for (const BlurRegion& region : regions) {
+                             drawRegion(temporaryBlurredImage, region);
+@@ -1617,6 +1795,11 @@ void SkiaRenderEngine::drawShadow(SkCanvas* canvas,
+ }
+ 
+ void SkiaRenderEngine::onActiveDisplaySizeChanged(ui::Size size) {
++    {
++        std::lock_guard<std::mutex> lock(mRenderingMutex);
++        mBlurCache.clear();
++    }
++
+     // This cache multiplier was selected based on review of cache sizes relative
+     // to the screen resolution. Looking at the worst case memory needed by blur (~1.5x),
+     // shadows (~1x), and general data structures (e.g. vertex buffers) we selected this as a
+diff --git a/libs/renderengine/skia/SkiaRenderEngine.h b/libs/renderengine/skia/SkiaRenderEngine.h
+index 88b8acc08f..2c3519d836 100644
+--- a/libs/renderengine/skia/SkiaRenderEngine.h
++++ b/libs/renderengine/skia/SkiaRenderEngine.h
+@@ -28,6 +28,7 @@
+ #include <renderengine/RenderEngine.h>
+ #include <sys/types.h>
+ 
++#include <deque>
+ #include <memory>
+ #include <mutex>
+ #include <unordered_map>
+@@ -218,6 +219,16 @@ private:
+ 
+     sp<Fence> mLastDrawFence;
+     BlurFilter* mBlurFilter = nullptr;
++
++    // Blur results reused across frames. Keyed on the input hash and the blur parameters.
++    struct BlurCacheEntry {
++        sk_sp<SkImage> image;
++        uint64_t inputHash;
++        uint32_t blurRadius;
++        SkIRect blurRect;
++    };
++    static constexpr size_t kBlurCacheMaxEntries = 4;
++    std::deque<BlurCacheEntry> mBlurCache;
+     // Offscreen layer for blurs below the max cross-fade radius, reused across frames.
+     sk_sp<SkSurface> mCompositionLayerSurface;
+ 
+diff --git a/services/surfaceflinger/LayerFE.cpp b/services/surfaceflinger/LayerFE.cpp
+index 6105ebe87c..aa1953ec49 100644
+--- a/services/surfaceflinger/LayerFE.cpp
++++ b/services/surfaceflinger/LayerFE.cpp
+@@ -205,6 +205,7 @@ std::optional<compositionengine::LayerFE::LayerSettings> LayerFE::prepareClientC
+ void LayerFE::prepareClearClientComposition(LayerFE::LayerSettings& layerSettings,
+                                             bool blackout) const {
+     layerSettings.source.buffer.buffer = nullptr;
++    layerSettings.source.buffer.frameNumber = 0;
+     layerSettings.source.solidColor = half3(0.0f, 0.0f, 0.0f);
+     layerSettings.disableBlending = true;
+     layerSettings.bufferId = 0;
+@@ -249,6 +250,7 @@ void LayerFE::prepareBufferStateClientComposition(
+     }
+ 
+     layerSettings.source.buffer.buffer = mSnapshot->externalTexture;
++    layerSettings.source.buffer.frameNumber = mSnapshot->frameNumber;
+     layerSettings.source.buffer.isOpaque = mSnapshot->contentOpaque;
+     layerSettings.source.buffer.fence = mSnapshot->acquireFence;
+     layerSettings.source.buffer.usePremultipliedAlpha = mSnapshot->premultipliedAlpha;
+-- 
+2.54.0
+
+
+From 376135b26a14267fd08dffb82534b7d2edbb47bc Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 07:26:08 +0000
+Subject: [PATCH 4/7] surfaceflinger: Compare all render-affecting fields in
+ the composition cache
+
+equalIgnoringSource decides whether a cached client composition request can be
+reused. It did not compare skipContentDraw, blurRegionTransform or luts. A
+layer whose only change was one of those fields was served from the cache
+with a stale request, so its blur regions or LUTs were not updated.
+
+Compare the three fields, so a change in any of them misses the cache. Layers
+whose render inputs do not change still hit the cache.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ .../src/ClientCompositionRequestCache.cpp                  | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp b/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
+index 3dac339f46..9d8ec6731f 100644
+--- a/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
++++ b/services/surfaceflinger/CompositionEngine/src/ClientCompositionRequestCache.cpp
+@@ -35,12 +35,15 @@ inline bool equalIgnoringSource(const renderengine::LayerSettings& lhs,
+     return lhs.geometry == rhs.geometry && lhs.alpha == rhs.alpha &&
+             lhs.sourceDataspace == rhs.sourceDataspace &&
+             lhs.colorTransform == rhs.colorTransform &&
+-            lhs.disableBlending == rhs.disableBlending && lhs.shadow == rhs.shadow &&
++            lhs.disableBlending == rhs.disableBlending &&
++            lhs.skipContentDraw == rhs.skipContentDraw && lhs.shadow == rhs.shadow &&
+             lhs.backgroundBlurRadius == rhs.backgroundBlurRadius &&
+             lhs.backgroundBlurScale == rhs.backgroundBlurScale &&
++            lhs.blurRegions == rhs.blurRegions &&
++            lhs.blurRegionTransform == rhs.blurRegionTransform &&
+             lhs.stretchEffect == rhs.stretchEffect &&
+             lhs.edgeExtensionEffect == rhs.edgeExtensionEffect &&
+-            lhs.whitePointNits == rhs.whitePointNits && lhs.blurRegions == rhs.blurRegions;
++            lhs.whitePointNits == rhs.whitePointNits && lhs.luts == rhs.luts;
+ }
+ 
+ inline bool equalIgnoringBuffer(const renderengine::Buffer& lhs, const renderengine::Buffer& rhs) {
+-- 
+2.54.0
+
+
+From f85f80b8dde29abc5520b0305e1e7134053c7ed3 Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 09:15:08 +0000
+Subject: [PATCH 5/7] renderengine: Discard exact-size KawaseDualFilterV2
+ passes before drawing
+
+A pass that writes an exact-size target with alpha 1 overwrites every pixel
+with a kSrc draw, so the old contents are not needed. Discarding first avoids
+loading them, which costs DRAM bandwidth on tile-based GPUs.
+
+Preallocated targets are larger than their content, and the sampler reads the
+padding, so they keep their contents. That path is not changed, so the output
+is unchanged on every path.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ .../renderengine/skia/filters/KawaseBlurDualFilterV2.cpp | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
+index 660c2a1383..7be60b313d 100644
+--- a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
++++ b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
+@@ -191,7 +191,14 @@ void KawaseBlurDualFilterV2::blurInto(const sk_sp<SkSurface>& drawSurface, sk_sp
+         paint.setShader(blurBuilder.makeShader(nullptr));
+     }
+     paint.setBlendMode(alpha == 1.0f ? SkBlendMode::kSrc : SkBlendMode::kSrcOver);
+-    drawSurface->getCanvas()->drawPaint(paint);
++    SkCanvas* canvas = drawSurface->getCanvas();
++    if (alpha == 1.0f && !inputEdgesNeedClamp) {
++        // The kSrc draw covers an exact-size target completely, so the old contents are not needed.
++        // inputEdgesNeedClamp is set for preallocated targets, which are larger than their content and
++        // whose padding the sampler reads. Those keep their contents.
++        canvas->discard();
++    }
++    canvas->drawPaint(paint);
+ }
+ 
+ sk_sp<SkImage> KawaseBlurDualFilterV2::generateTemporaryImage(SkiaGpuContext* context,
+-- 
+2.54.0
+
+
+From 9fe0728fb9aeac6abd3a022e54b75fd7dbd9c05c Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 3 Nov 2026 09:16:07 +0000
+Subject: [PATCH 6/7] renderengine: Share the KawaseDualFilterV2 downsample
+ chain on preallocated targets
+
+On the preallocated path, which is the default on device, each blur ran the
+whole pipeline on the same preallocated set, including the downsample passes.
+
+The downsample levels do not depend on the blur radius. They are now computed
+once for a layer's input and reused by every blur of that layer, and each
+radius runs only its upsample passes. The levels stay in the existing
+preallocated set. The upsample passes write to a second preallocated set,
+allocated at the same time and with the same sizes, so no pass overwrites a
+level another radius still needs. Nothing is allocated during a draw.
+
+The shared path applies only when preallocated textures are in use. The other
+path, which allocates per pass, is unchanged. The arithmetic is the same as in
+generateTemporaryImage, so the output is unchanged.
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ .../skia/filters/KawaseBlurDualFilterV2.cpp   | 159 +++++++++++++++++-
+ .../skia/filters/KawaseBlurDualFilterV2.h     |  14 ++
+ 2 files changed, 172 insertions(+), 1 deletion(-)
+
+diff --git a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
+index 7be60b313d..43ee222387 100644
+--- a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
++++ b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.cpp
+@@ -201,6 +201,150 @@ void KawaseBlurDualFilterV2::blurInto(const sk_sp<SkSurface>& drawSurface, sk_sp
+     canvas->drawPaint(paint);
+ }
+ 
++// The downsample levels of one blur input, in the preallocated set. They depend only on the input and the
++// rectangle, never on the radius, so the blurs of one layer share them. Each radius runs only its upsample
++// passes, into the second preallocated set. Only one prepared input is in use at a time, so the layer blur
++// block drops it before the next layer; a generation check fails safely if it has been overtaken.
++class KawaseBlurDualFilterV2::PreparedInput : public BlurFilter::PreparedBlurInput {
++public:
++    PreparedInput(const KawaseBlurDualFilterV2* filter, const DisplaySettings& display,
++                  const sk_sp<SkImage>& input, const SkRect& blurRect, uint64_t generation,
++                  bool isProtected)
++          : mFilter(filter), mInput(input), mBlurRect(blurRect),
++            mGeneration(generation), mDataspace(display.outputDataspace),
++            mDownTextures(isProtected ? filter->mProtectedTextures : filter->mUnprotectedTextures),
++            mUpTextures(isProtected ? filter->mProtectedUpTextures
++                                    : filter->mUnprotectedUpTextures) {
++        blurRect.roundIn(&mTargetBlurRect);
++        for (int i = 0; i < kMaxSurfaces; i++) {
++            const int newW = std::max(1, static_cast<int>(static_cast<float>(mTargetBlurRect.width()) / kScales[i]));
++            const int newH = std::max(1, static_cast<int>(static_cast<float>(mTargetBlurRect.height()) / kScales[i]));
++            mInfos[i] = input->imageInfo().makeWH(newW, newH);
++        }
++    }
++
++    const sk_sp<SkSurface>& level(int i) const { return mLevels[i]; }
++    const SkImageInfo& info(int i) const { return mInfos[i]; }
++    sk_sp<SkSurface> upTarget(int i) const { return mUpTextures[i]->getOrCreateSurface(mDataspace); }
++
++    // Makes levels 0..depth available. Returns false if a target is missing or the levels were taken by
++    // another prepared input.
++    bool ensureLevels(int depth) {
++        if (mFilter->mChainGeneration != mGeneration) {
++            return false;
++        }
++        for (; mComputed <= depth; mComputed++) {
++            const int i = mComputed;
++            mLevels[i] = mDownTextures[i]->getOrCreateSurface(mDataspace);
++            if (!mLevels[i]) {
++                return false;
++            }
++            if (i == 0) {
++                SkMatrix blurMatrix = SkMatrix::Translate(-mBlurRect.fLeft, -mBlurRect.fTop);
++                blurMatrix.postScale(kInputScale, kInputScale);
++                const auto sourceShader =
++                        mInput->makeShader(SkTileMode::kClamp, SkTileMode::kClamp,
++                                           SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone));
++                mFilter->blurInto(mLevels[0], std::move(sourceShader), mTargetBlurRect, blurMatrix,
++                                  true, 0, 1.0f, mFilter->mQuarterResDownSampleBlurEffect);
++            } else {
++                mFilter->blurInto(mLevels[i], mInfos[i].width(), mLevels[i - 1]->makeTemporaryImage(),
++                                  mInfos[i - 1].bounds(), true, 0, 1.0f,
++                                  mFilter->mHalfResDownSampleBlurEffect);
++            }
++        }
++        return true;
++    }
++
++private:
++    const KawaseBlurDualFilterV2* mFilter;
++    sk_sp<SkImage> mInput;
++    SkRect mBlurRect;
++    uint64_t mGeneration;
++    decltype(DisplaySettings::outputDataspace) mDataspace;
++    const std::shared_ptr<AutoBackendTexture::LocalRef>* mDownTextures;
++    const std::shared_ptr<AutoBackendTexture::LocalRef>* mUpTextures;
++    SkIRect mTargetBlurRect;
++    SkImageInfo mInfos[kMaxSurfaces];
++    sk_sp<SkSurface> mLevels[kMaxSurfaces];
++    int mComputed = 0;
++};
++
++std::unique_ptr<BlurFilter::PreparedBlurInput> KawaseBlurDualFilterV2::prepareBlurInput(
++        SkiaGpuContext* context, const DisplaySettings& display, const sk_sp<SkImage>& input,
++        const SkRect& blurRect) const {
++    if (!context || !input) {
++        return nullptr;
++    }
++    const bool isProtected = context->supportsProtectedContent();
++    const bool usesPreallocatedTextures =
++            FlagManager::getInstance().window_blur_kawase2_preallocate_buffers() &&
++            (isProtected ||
++             context->getBackend_onlyUseForCriticalWorkarounds() ==
++                     RenderEngine::SkiaBackend::Graphite);
++    // Only preallocated targets are shared. The other path allocates per pass, as before.
++    if (!usesPreallocatedTextures) {
++        return nullptr;
++    }
++    const auto& upTextures = isProtected ? mProtectedUpTextures : mUnprotectedUpTextures;
++    if (upTextures[0] == nullptr) {
++        return nullptr;
++    }
++    const uint64_t generation = ++mChainGeneration;
++    return std::make_unique<PreparedInput>(this, display, input, blurRect, generation, isProtected);
++}
++
++sk_sp<SkImage> KawaseBlurDualFilterV2::generateFromPreparedInput(
++        BlurFilter::PreparedBlurInput& prepared, uint32_t blurRadius) const {
++    PreparedInput& p = static_cast<PreparedInput&>(prepared);
++
++    // Same radius and pass arithmetic as generateTemporaryImage, so the result is identical.
++    const float radius = blurRadius * 0.57735f;
++    const float filterDepth = std::min(kMaxSurfaces - 1.0f, radius * kInputScale / 2.5f);
++    const int filterPasses = std::min(kMaxSurfaces - 1, static_cast<int>(ceil(filterDepth)));
++    if (!p.ensureLevels(filterPasses)) {
++        return nullptr;
++    }
++    if (filterPasses == 0) {
++        return p.level(0)->makeTemporaryImage();
++    }
++    float sumSquaredR = 0;
++    float sumSquaredStep = 0;
++    for (int i = 0; i < filterPasses; i++) {
++        const float alpha = std::min(1.0f, filterDepth - i);
++        sumSquaredR += powf(powf(2.0f, i - 1) * alpha * M_SQRT2, 2.0f);
++        sumSquaredStep += powf(powf(2.0f, i) * alpha, 2.0f);
++    }
++    // Solve for R = sqrt(sum(r_i^2)).
++    float step = sqrt(max(0.0f, powf(radius * kInputScale, 2) - sumSquaredR) /
++                      (sumSquaredStep == 0 ? 1 : sumSquaredStep));
++
++
++    sk_sp<SkSurface> up[kMaxSurfaces];
++    for (int i = 0; i < filterPasses; i++) {
++        up[i] = p.upTarget(i);
++        if (!up[i]) {
++            return nullptr;
++        }
++    }
++    for (int i = filterPasses - 1; i >= 0; i--) {
++        const sk_sp<SkSurface>& source = (i + 1 == filterPasses) ? p.level(i + 1) : up[i + 1];
++        const float alpha = std::min(1.0f, filterDepth - i);
++        if (alpha < 1.0f) {
++            // A partial pass blends with what its target already holds, which must be level i, as in
++            // generateTemporaryImage. The shared upsample target holds an earlier blur's result, so copy
++            // level i into it first.
++            SkPaint copy;
++            copy.setBlendMode(SkBlendMode::kSrc);
++            up[i]->getCanvas()->drawImage(p.level(i)->makeTemporaryImage(), 0, 0,
++                                          SkSamplingOptions(), &copy);
++        }
++        blurInto(up[i], p.info(i).width(), source->makeTemporaryImage(), p.info(i + 1).bounds(),
++                 true, step, alpha, mUpSampleBlurEffect);
++    }
++    return up[0]->makeTemporaryImage();
++}
++
+ sk_sp<SkImage> KawaseBlurDualFilterV2::generateTemporaryImage(SkiaGpuContext* context,
+                                                               const DisplaySettings& display,
+                                                               const uint32_t blurRadius,
+@@ -319,7 +463,8 @@ bool KawaseBlurDualFilterV2::areBuffersPreallocated(const SkiaGpuContext* contex
+     }
+ 
+     const auto& preallocatedTextures = isProtected ? mProtectedTextures : mUnprotectedTextures;
+-    if (preallocatedTextures[0] == nullptr) {
++    const auto& upTextures = isProtected ? mProtectedUpTextures : mUnprotectedUpTextures;
++    if (preallocatedTextures[0] == nullptr || upTextures[0] == nullptr) {
+         return false;
+     }
+ 
+@@ -340,6 +485,7 @@ void KawaseBlurDualFilterV2::preallocateBuffers(SkiaGpuContext* context, ui::Siz
+     }
+ 
+     auto& texturesRef = isProtected ? mProtectedTextures : mUnprotectedTextures;
++    auto& upTexturesRef = isProtected ? mProtectedUpTextures : mUnprotectedUpTextures;
+     ui::Size& displaySizeRef = isProtected ? mProtectedDisplaySize : mUnprotectedDisplaySize;
+     const uint64_t usageFlags = isProtected ? kProtectedUsageFlags : kUnprotectedUsageFlags;
+     // Use the longer side as the ref size for the preallocated square, so that it can handle
+@@ -367,6 +513,17 @@ void KawaseBlurDualFilterV2::preallocateBuffers(SkiaGpuContext* context, ui::Siz
+         texturesRef[i] = std::make_shared<AutoBackendTexture::LocalRef>(std::move(backendTexture),
+                                                                         mTextureCleanupMgr);
+         totalBytes += newW * newH * bytesPerPixel(PIXEL_FORMAT_RGBA_8888);
++
++        // Second set for the upsample targets of shared-chain blurs, allocated up front like the first.
++        sp<GraphicBuffer> upBuffer = sp<GraphicBuffer>::make(newW, newH, PIXEL_FORMAT_RGBA_8888, 1,
++                                                             usageFlags, "KawaseBlurDualFilterV2Up");
++        LOG_ALWAYS_FATAL_IF(upBuffer->initCheck() != OK,
++                            "Failed to preallocate upsample GraphicBuffer %d (%dx%d)", i, newW, newH);
++        std::unique_ptr<SkiaBackendTexture> upBackendTexture =
++                context->makeBackendTexture(upBuffer->toAHardwareBuffer(), true);
++        upTexturesRef[i] = std::make_shared<AutoBackendTexture::LocalRef>(std::move(upBackendTexture),
++                                                                          mTextureCleanupMgr);
++        totalBytes += newW * newH * bytesPerPixel(PIXEL_FORMAT_RGBA_8888);
+     }
+     ALOGD("(Re)allocated %zu bytes of %s memory for intermediate blur surfaces (%dx%d display)",
+           totalBytes, isProtected ? "protected" : "unprotected", size.width, size.height);
+diff --git a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.h b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.h
+index 0b99de22ee..8a34736ff8 100644
+--- a/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.h
++++ b/libs/renderengine/skia/filters/KawaseBlurDualFilterV2.h
+@@ -58,6 +58,13 @@ public:
+                                           const SkRect& blurRect) const override;
+ 
+     bool areBuffersPreallocated(const SkiaGpuContext* context, ui::Size displaySize) const override;
++
++    std::unique_ptr<PreparedBlurInput> prepareBlurInput(SkiaGpuContext* context,
++                                                        const DisplaySettings& display,
++                                                        const sk_sp<SkImage>& input,
++                                                        const SkRect& blurRect) const override;
++    sk_sp<SkImage> generateFromPreparedInput(PreparedBlurInput& prepared,
++                                             uint32_t blurRadius) const override;
+     // Note: the buffer preallocation code path is never enabled for the unprotected context on
+     // GaneshGL due to performance reasons (nuance around texture copying logic for wrapped AHBs).
+     // It can be enabled for the protected context on GaneshGL for memory savings, as protected
+@@ -82,6 +89,13 @@ private:
+     mutable std::mutex mRenderingMutex;
+     std::shared_ptr<AutoBackendTexture::LocalRef> mUnprotectedTextures[kMaxSurfaces];
+     std::shared_ptr<AutoBackendTexture::LocalRef> mProtectedTextures[kMaxSurfaces];
++
++    // Upsample targets for blurs that share a layer's downsample chain. A second preallocated set, so
++    // an upsample pass never overwrites a level that another radius still needs.
++    std::shared_ptr<AutoBackendTexture::LocalRef> mUnprotectedUpTextures[kMaxSurfaces];
++    std::shared_ptr<AutoBackendTexture::LocalRef> mProtectedUpTextures[kMaxSurfaces];
++    class PreparedInput;
++    mutable uint64_t mChainGeneration = 0;
+     ui::Size mUnprotectedDisplaySize;
+     ui::Size mProtectedDisplaySize;
+ 
+-- 
+2.54.0
+
+
+From a7eaadbbc4fc8c7f13da361dc36c5a00e3a2b75b Mon Sep 17 00:00:00 2001
+From: Omkar Parte <rakmoparte@gmail.com>
+Date: Tue, 3 Nov 2026 23:28:35 +0530
+Subject: [PATCH 7/7] renderengine: reduce blur input scale to 0.20 and
+ increase crossfade threshold to 10
+
+Signed-off-by: Omkar Parte <88646966+RAM-UNLOK@users.noreply.github.com>
+---
+ libs/renderengine/skia/filters/BlurFilter.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libs/renderengine/skia/filters/BlurFilter.h b/libs/renderengine/skia/filters/BlurFilter.h
+index e5215c58d4..4f80892ce6 100644
+--- a/libs/renderengine/skia/filters/BlurFilter.h
++++ b/libs/renderengine/skia/filters/BlurFilter.h
+@@ -39,11 +39,11 @@ namespace skia {
+ class BlurFilter {
+ public:
+     // Downsample FBO to improve performance
+-    static constexpr float kInputScale = 0.22f;
++    static constexpr float kInputScale = 0.20f;
+     // Downsample scale factor used to improve performance
+     static constexpr float kInverseInputScale = 1.0f / kInputScale;
+ 
+-    explicit BlurFilter(RuntimeEffectManager& effectManager, float maxCrossFadeRadius = 9.0f);
++    explicit BlurFilter(RuntimeEffectManager& effectManager, float maxCrossFadeRadius = 10.0f);
+     virtual ~BlurFilter(){}
+ 
+     // Execute blur, saving it to a TEMPORARY texture. WARNING: the returned SkImage is only
+-- 
+2.54.0
+
