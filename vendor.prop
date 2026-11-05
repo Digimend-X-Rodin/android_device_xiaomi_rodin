@@ -60,7 +60,7 @@ vendor.streamin.pcm.dump=0
 
 # AVF
 avf.remote_attestation.enabled=0
-hypervisor.memory_reclaim.supported=true
+hypervisor.memory_reclaim.supported=1
 ro.boot.hypervisor.version=GenieZone
 ro.boot.hypervisor.vm.supported=1
 
@@ -124,7 +124,6 @@ ro.crypto.volume.options=aes-256-xts:aes-256-hctr2
 debug.sf.enable_adpf_cpu_hint=true
 debug.hwui.use_hint_manager=true
 debug.sf.disable_transparent_region_hint=true
-debug.sf.disable_client_composition_cache=0
 debug.mediatek.disp_decompress=1
 debug.renderengine.backend=skiaglthreaded
 debug.sf.use_phase_offsets_as_durations=1
@@ -153,12 +152,10 @@ debug.sf.enable_hwc_vds=0
 debug.sf.set_binder_thread_rt=1
 debug.sf.frame_rate_multiple_threshold=120
 debug.sf.treat_170m_as_sRGB=1
-debug.sf.predict_hwc_composition_strategy=0
 debug.sf.enable_sdr_dimming=1
 debug.sf.dim_in_gamma_in_enhanced_screenshots=1
 persist.sys.sf.native_mode=258
-persist.sys.sf.color_saturation=1.1
-ro.sf.disable_triple_buffer=0
+persist.sys.sf.color_saturation=1.0
 ro.hardware.hwcomposer=mtk_common
 ro.hardware.gralloc=common
 ro.surface_flinger.force_hwc_copy_for_virtual_displays=true
@@ -213,13 +210,14 @@ vendor.agps.submarine.mode=0
 ro.vendor.gps.chrdev=gps_drv_dl_v051
 
 # Graphics
-debug.hwui.initialize_gl_always=0
-debug.hwui.render_dirty_regions=false
+debug.hwui.initialize_gl_always=1
 ro.hwui.use_vulkan=true
 graphics.gpu.profiler.support=true
 ro.hardware.egl=meow
 ro.hardware.vulkan=mali
 ro.opengles.version=196610
+ro.egl.blobcache.multifile=true
+ro.egl.blobcache.multifile_limit=33554432
 ro.vendor.arm.egl.configs.r5_g6_b5_a0_16bit_fixed.hal_format=0x4
 ro.vendor.arm.egl.configs.r5_g6_b5_a0_16bit_fixed.recordable=false
 ro.vendor.arm.egl.configs.r5_g6_b5_a0_16bit_fixed.framebuffer_target=false
